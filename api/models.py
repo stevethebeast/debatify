@@ -1,18 +1,5 @@
 from django.db import models
 
-# Create your models here.
-class Hero(models.Model):
-    name = models.CharField(max_length=60)
-    alias = models.CharField(max_length=60)
-    def __str__(self):
-        return self.name
-
-class yourMom(models.Model):
-    name = models.CharField(max_length=60)
-    alias = models.CharField(max_length=60)
-    def __str__(self):
-        return self.name
-
 class Contact(models.Model):
     ID = models.AutoField(primary_key=True)
     NAME = models.CharField(max_length=100)
@@ -36,7 +23,8 @@ class Debate(models.Model):
 
 class Argument(models.Model):
     ID = models.AutoField(primary_key=True)
-    TEXT = models.CharField(max_length=500)
+    TITLE = models.CharField(max_length=200)
+    TEXT = models.CharField(max_length=600)
     DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE)
     SCORE = models.IntegerField()
     CONTACT_ID = models.ForeignKey(Contact, on_delete=models.CASCADE)
@@ -46,7 +34,8 @@ class Argument(models.Model):
 
 class Counter_argument(models.Model):
     ID = models.AutoField(primary_key=True)
-    TEXT = models.CharField(max_length=500)
+    TITLE = models.CharField(max_length=200)
+    TEXT = models.CharField(max_length=600)
     ARGUMENT_ID = models.ForeignKey(Argument, on_delete=models.CASCADE)
     SCORE = models.IntegerField()
     CONTACT_ID = models.ForeignKey(Contact, on_delete=models.CASCADE)
@@ -82,16 +71,3 @@ class Voting_right(models.Model):
     CONTACT_ID = models.ForeignKey(Contact, on_delete=models.CASCADE)
     def __str__(self):
         return self.DEBATE_ID, self.CONTACT_ID
-
-class Usergroup(models.Model):
-    ID = models.AutoField(primary_key=True)
-    NAME = models.CharField(max_length=50)
-    CONTACT_ID = models.ForeignKey(Contact, on_delete=models.CASCADE)
-    def __str__(self):
-        return self.NAME
-
-class Usergroup_contact(models.Model):
-    CONTACT_ID = models.ForeignKey(Contact, on_delete=models.CASCADE)
-    USERGROUP_ID = models.ForeignKey(Usergroup, on_delete=models.CASCADE)
-    def __str__(self):
-        return self.CONTACT_ID, self.USERGROUP_ID
