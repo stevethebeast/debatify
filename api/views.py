@@ -10,7 +10,8 @@ from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from .serializers import HeroSerializer, momSerializer, ContactSerializer, DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, VotingRightSerializer,\
-UserGroupSerializer, UserGroupContactSerializer, DebateArgumentsSerializer
+UserGroupSerializer, UserGroupContactSerializer
+#, DebateArgumentsSerializer
 from .models import Hero, yourMom, Contact, Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
 Counter_argument_vote, Voting_right, Usergroup, Usergroup_contact
 

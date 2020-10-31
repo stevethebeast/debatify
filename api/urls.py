@@ -24,7 +24,6 @@ router.register(r'UserGroupContacts', views.UserGroupContactViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('test/allright/', views.dawg),
     #url(r'^api/argsdebate$', views.ListOfArguments),
     #url(r'^api/tutorials/(?P<pk>[0-9]+)$', views.tutorial_detail),
     #url(r'^api/tutorials/published$', views.tutorial_list_published)
