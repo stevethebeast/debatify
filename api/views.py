@@ -8,21 +8,11 @@ from django.shortcuts import render
 from django.db.models import F
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
-from .serializers import HeroSerializer, momSerializer, ContactSerializer, DebateSerializer, ArgumentSerializer,\
-CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, VotingRightSerializer,\
-UserGroupSerializer, UserGroupContactSerializer
+from .serializers import ContactSerializer, DebateSerializer, ArgumentSerializer,\
+CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, VotingRightSerializer
 #, DebateArgumentsSerializer
-from .models import Hero, yourMom, Contact, Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Voting_right, Usergroup, Usergroup_contact
-
-
-class HeroViewSet(viewsets.ModelViewSet):
-    queryset = Hero.objects.all().order_by('name')
-    serializer_class = HeroSerializer
-
-class MomViewSet(viewsets.ModelViewSet):
-    queryset = yourMom.objects.all().order_by('name')
-    serializer_class = momSerializer
+from .models import Contact, Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
+Counter_argument_vote, Voting_right
 
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all().order_by('ID')
@@ -55,11 +45,3 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
 class VotingRightViewSet(viewsets.ModelViewSet):
     queryset = Voting_right.objects.all().order_by('DEBATE_ID')
     serializer_class = VotingRightSerializer
-
-class UserGroupViewSet(viewsets.ModelViewSet):
-    queryset = Usergroup.objects.all().order_by('ID')
-    serializer_class = UserGroupSerializer
-
-class UserGroupContactViewSet(viewsets.ModelViewSet):
-    queryset = Usergroup_contact.objects.all().order_by('CONTACT_ID')
-    serializer_class = UserGroupContactSerializer

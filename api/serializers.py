@@ -1,17 +1,7 @@
 from rest_framework import serializers
 
-from .models import Hero, yourMom, Contact, Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Voting_right, Usergroup, Usergroup_contact
-
-class HeroSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Hero
-        fields = ('name', 'alias')
-
-class momSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = yourMom
-        fields = ('name', 'alias')
+from .models import Contact, Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
+Counter_argument_vote, Voting_right
 
 class ContactSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -26,12 +16,12 @@ class DebateSerializer(serializers.HyperlinkedModelSerializer):
 class ArgumentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Argument
-        fields = ('ID', 'TEXT', 'DEBATE_ID', 'SCORE', 'CONTACT_ID', 'SIDE')
+        fields = ('ID', 'TITLE', 'TEXT', 'DEBATE_ID', 'SCORE', 'CONTACT_ID', 'SIDE')
 
 class CounterArgumentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Counter_argument
-        fields = ('ID', 'TEXT', 'ARGUMENT_ID', 'SCORE', 'CONTACT_ID')
+        fields = ('ID', 'TITLE', 'TEXT', 'ARGUMENT_ID', 'SCORE', 'CONTACT_ID')
 
 class DebateVoteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -52,13 +42,3 @@ class VotingRightSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Voting_right
         fields = ('DEBATE_ID', 'CONTACT_ID')
-
-class UserGroupSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Usergroup
-        fields = ('ID', 'NAME', 'CONTACT_ID')
-
-class UserGroupContactSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Usergroup_contact
-        fields = ('CONTACT_ID', 'USERGROUP_ID')

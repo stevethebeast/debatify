@@ -4,8 +4,6 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register(r'heroes', views.HeroViewSet)
-router.register(r'moms', views.MomViewSet)
 router.register(r'Contacts', views.ContactViewSet)
 router.register(r'Arguments', views.ArgumentViewSet)
 router.register(r'Debates', views.DebateViewSet)
@@ -14,8 +12,6 @@ router.register(r'DebateVotes', views.DebateVoteViewSet)
 router.register(r'ArgumentVotes', views.ArgumentVoteViewSet)
 router.register(r'CounterArgumentVotes', views.CounterArgumentVoteViewSet)
 router.register(r'VotingRights', views.VotingRightViewSet)
-router.register(r'UserGroups', views.UserGroupViewSet)
-router.register(r'UserGroupContacts', views.UserGroupContactViewSet)
 #router.register(r'UserGrhellooupContacts', views.hello, basename= 'test')
 #router.register(r'test', views.hello)
 
