@@ -4,7 +4,7 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register(r'Contacts', views.ContactViewSet)
+#router.register(r'Contacts', views.ContactViewSet)
 router.register(r'Arguments', views.ArgumentViewSet)
 router.register(r'Debates', views.DebateViewSet)
 router.register(r'CounterArguments', views.CounterArgumentViewSet)
@@ -22,6 +22,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^argumentsbydebateid$', views.ListOfArguments),
     url(r'^counterargumentsbyid$', views.ListOfCounterArguments),
+    url(r'^searchdebatesbynameandtitles$', views.SearchDebatesAPIView.as_view()),
     #url(r'^api/tutorials/(?P<pk>[0-9]+)$', views.tutorial_detail),
     #url(r'^api/tutorials/published$', views.tutorial_list_published)
 ]

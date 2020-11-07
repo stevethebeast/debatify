@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
-from .models import Contact, Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
+from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
 Counter_argument_vote, Voting_right
 
-class ContactSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Contact
-        fields = ('ID', 'NAME', 'EMAIL', 'PASSWORD')
+#class ContactSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = Contact
+#        fields = ('USER', 'ID', 'CREATED_AT')
 
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
