@@ -3,15 +3,10 @@ from rest_framework import serializers
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
 Counter_argument_vote, Voting_right
 
-#class ContactSerializer(serializers.ModelSerializer):
-#    class Meta:
-#        model = Contact
-#        fields = ('USER', 'ID', 'CREATED_AT')
-
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Debate
-        fields = ('ID', 'NAME', 'YES_TITLE', 'NO_TITLE', 'CONTEXT', 'PHOTO_PATH', 'YES_SCORE', 'NO_SCORE', 'CONTACT_ID')
+        fields = ('ID', 'NAME', 'YES_TITLE', 'NO_TITLE', 'CONTEXT', 'PHOTO_PATH', 'YES_SCORE', 'NO_SCORE', 'CREATOR_ID')
 
 class ArgumentSerializer(serializers.ModelSerializer):
     class Meta:

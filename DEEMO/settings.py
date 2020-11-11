@@ -66,6 +66,8 @@ REST_FRAMEWORK = {
     ),
 }
 
+AUTH_USER_MODEL = 'api.User'
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'DEEMO.urls'

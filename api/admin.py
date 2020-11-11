@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote, Counter_argument_vote, Voting_right
-#admin.site.register(Contact)
+from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote, Counter_argument_vote, Voting_right, User
+admin.site.register(User)
 admin.site.register(Debate)
 admin.site.register(Argument)
 admin.site.register(Counter_argument)
