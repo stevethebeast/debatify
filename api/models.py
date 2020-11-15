@@ -43,11 +43,11 @@ class User(AbstractUser):
 class DebateManager(models.Manager):
     def with_debatevotes(self, debate, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT ad.ID DEBATE_ID, ad.NAME, ad.YES_TITLE, ad.NO_TITLE, ad.CONTEXT, ad.PHOTO_PATH, ad.YES_SCORE, ad.NO_SCORE, ad.CREATOR_ID_id CREATOR_ID, CAST(ad.CREATED_AT AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.SIDE\
-                FROM api_debate ad LEFT OUTER JOIN \
-                (SELECT DEBATE_ID_id DEBATE_ID, CONTACT_ID_id CONTACT_ID, SIDE\
+            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\"\
+                FROM api_debate AS ad LEFT OUTER JOIN \
+                (SELECT \"DEBATE_ID_id\" DEBATE_ID, \"CONTACT_ID_id\" CONTACT_ID, \"SIDE\"\
                 FROM api_debate_vote\
-                WHERE DEBATE_ID_id=%s AND CONTACT_ID_id=%s) adv ON ad.ID=adv.DEBATE_ID;", [debate, user])
+                WHERE \"DEBATE_ID_id\"=%s AND \"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID;", [debate, user])
             objects_list = []
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
@@ -58,11 +58,9 @@ class DebateManager(models.Manager):
                 d["NO_TITLE"] = row[3]
                 d["CONTEXT"] = row[4]
                 d["PHOTO_PATH"] = row[5]
-                d["YES_SCORE"] = row[6]
-                d["NO_SCORE"] = row[7]
-                d["CREATOR_ID"] = row[8]
-                d["CREATED_AT"] = row[9]
-                d["CONTACT_ID"] = row[10]
+                d["CREATOR_ID"] = row[6]
+                d["CREATED_AT"] = row[7]
+                d["CONTACT_ID"] = row[8]
                 d["SIDE"] = row[11]
                 objects_list.append(d)
         return objects_list
@@ -83,11 +81,11 @@ class Debate(models.Model):
 class ArgumentManager(models.Manager):
     def with_argumentlikes(self, argument, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT arg.ID ARGUMENT_ID, arg.TITLE, arg.TEXT, arg.SCORE, arg.SIDE, arg.CREATED_AT, arg.CONTACT_ID_id CONTACT_ID, arg.DEBATE_ID_id DEBATE_ID\
-                FROM api_argument arg LEFT OUTER JOIN\
-                (SELECT LIKE, ARGUMENT_ID_id ARGUMENT_ID\
+            cursor.execute("SELECT arg.\"ID\" ARGUMENT_ID, arg.\"TITLE\", arg.\"TEXT\", arg.\"SCORE\", arg.\"SIDE\", arg.\"CREATED_AT\", arg.\"CONTACT_ID_id\" CONTACT_ID, arg.\"DEBATE_ID_id\" DEBATE_ID\
+                FROM api_argument AS arg LEFT OUTER JOIN\
+                (SELECT \"LIKE\", \"ARGUMENT_ID_id\" ARGUMENT_ID\
                 FROM api_argument_vote\
-                WHERE CONTACT_ID_id=%s AND ARGUMENT_ID_id=%s) av ON arg.ID = av.ARGUMENT_ID;", [user, argument])
+                WHERE \"CONTACT_ID_id\"=%s AND \"ARGUMENT_ID_id\"=%s) av ON arg.\"ID\" = av.ARGUMENT_ID;", [user, argument])
             objects_list = []
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
@@ -116,6 +114,28 @@ class Argument(models.Model):
     def __str__(self):
         return self.TEXT
 
+class CounterArgumentManager(models.Manager):
+    def with_counterargumentlikes(self, argument, user):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT arg.\"ID\" COUNTER_ARGUMENT_ID, arg.\"TITLE\", arg.\"TEXT\", arg.\"SCORE\", arg.\"CREATED_AT\", arg.\"CONTACT_ID_id\" CONTACT_ID, arg.\"ID\" ARGUMENT_ID\
+                FROM api_counter_argument AS arg LEFT OUTER JOIN\
+                (SELECT \"LIKE\", \"COUNTER_ARGUMENT_ID_id\" COUNTER_ARGUMENT_ID\
+                FROM api_counter_argument_vote\
+                WHERE \"CONTACT_ID_id\"=%s AND \"COUNTER_ARGUMENT_ID_id\"=%s) av ON arg.\"ID\" = av.COUNTER_ARGUMENT_ID;", [user, argument])
+            objects_list = []
+            for row in cursor.fetchall():
+                #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
+                d = collections.OrderedDict()
+                d["COUNTER_ARGUMENT_ID"] = row[0]
+                d["TITLE"] = row[1]
+                d["TEXT"] = row[2]
+                d["SCORE"] = row[3]
+                d["CREATED_AT"] = row[4]
+                d["CONTACT_ID"] = row[5]
+                d["ARGUMENT_ID"] = row[6]
+                objects_list.append(d)
+        return objects_list
+
 class Counter_argument(models.Model):
     ID = models.AutoField(primary_key=True)
     TITLE = models.CharField(max_length=200)
@@ -124,6 +144,7 @@ class Counter_argument(models.Model):
     SCORE = models.IntegerField(blank=True, null=True)
     CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
+    objects = CounterArgumentManager()
     def __str__(self):
         return self.TEXT
 

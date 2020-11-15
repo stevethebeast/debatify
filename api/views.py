@@ -176,3 +176,20 @@ def GetAllArgumentsWithVotersByID(request):
         content = Argument.objects.all().order_by('ID')
         serializer = ArgumentSerializer(content, many=True)
         return Response(serializer.data)
+
+@api_view(['GET'])
+#@permission_classes([IsAuthenticated])
+def GetAllCounterArgumentsWithLikesByArgumentID(request):
+    key=request.auth
+    user = None
+    counterargumentid = request.query_params.get('id', None)
+    if counterargumentid is None:
+        content = {"Bad request": "Please put an id as argument"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    if key is not None:
+        user = Token.objects.get(key=key).user_id
+        return Response(Counter_argument.objects.with_counterargumentlikes(counterargumentid, user))
+    else:
+        content = Argument.objects.all().order_by('ID')
+        serializer = CounterArgumentSerializer(content, many=True)
+        return Response(serializer.data)
