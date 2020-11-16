@@ -6,7 +6,7 @@ Counter_argument_vote, Voting_right
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Debate
-        fields = ('ID', 'NAME', 'YES_TITLE', 'NO_TITLE', 'CONTEXT', 'PHOTO_PATH', 'YES_SCORE', 'NO_SCORE', 'CREATOR_ID')
+        fields = ('ID', 'NAME', 'YES_TITLE', 'NO_TITLE', 'CONTEXT', 'PHOTO_PATH', 'CREATOR_ID')
 
 class ArgumentSerializer(serializers.ModelSerializer):
     class Meta:

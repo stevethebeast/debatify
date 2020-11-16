@@ -32,6 +32,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 ALLOWED_HOSTS = [
     "damp-sea-29610.herokuapp.com",
     "127.0.0.1",
+    "tlatter.gitlab.io",
 ]
 
 
@@ -76,7 +77,7 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = 'api.User'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 ROOT_URLCONF = 'DEEMO.urls'
 
