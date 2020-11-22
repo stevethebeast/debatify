@@ -52,7 +52,7 @@ class DebateManager(models.Manager):
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
                 d = collections.OrderedDict()
-                d["DEBATE_ID"] = row[0]
+                d["ID"] = row[0]
                 d["NAME"] = row[1]
                 d["YES_TITLE"] = row[2]
                 d["NO_TITLE"] = row[3]
@@ -90,7 +90,7 @@ class ArgumentManager(models.Manager):
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
                 d = collections.OrderedDict()
-                d["ARGUMENT_ID"] = row[0]
+                d["ID"] = row[0]
                 d["TITLE"] = row[1]
                 d["TEXT"] = row[2]
                 d["SCORE"] = row[3]
@@ -113,7 +113,7 @@ class ArgumentManager(models.Manager):
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
                 d = collections.OrderedDict()
-                d["ARGUMENT_ID"] = row[0]
+                d["ID"] = row[0]
                 d["TITLE"] = row[1]
                 d["TEXT"] = row[2]
                 d["SCORE"] = row[3]
@@ -169,7 +169,7 @@ class CounterArgumentManager(models.Manager):
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
                 d = collections.OrderedDict()
-                d["COUNTER_ARGUMENT_ID"] = row[0]
+                d["ID"] = row[0]
                 d["TITLE"] = row[1]
                 d["ARGUMENT_ID"] = row[2]
                 d["SCORE"] = row[3]
