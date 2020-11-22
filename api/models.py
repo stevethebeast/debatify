@@ -41,13 +41,13 @@ class User(AbstractUser):
     objects = UserManager()
 
 class DebateManager(models.Manager):
-    def with_debatevotes(self, debate, user):
+    def with_debatevotes(self, user):
         with connection.cursor() as cursor:
             cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\"\
                 FROM api_debate AS ad LEFT OUTER JOIN \
                 (SELECT \"DEBATE_ID_id\" DEBATE_ID, \"CONTACT_ID_id\" CONTACT_ID, \"SIDE\"\
                 FROM api_debate_vote\
-                WHERE \"DEBATE_ID_id\"=%s AND \"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID;", [debate, user])
+                WHERE \"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID;", [user])
             objects_list = []
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))

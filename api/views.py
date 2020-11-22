@@ -150,7 +150,7 @@ def ListDebatesWithUserChoices(request):
     user = None
     if key is not None:
         user = Token.objects.get(key=key).user_id
-        return Response(Debate.objects.with_debatevotes(debateid, user))
+        return Response(Debate.objects.with_debatevotes(user))
     else:
         content = Debate.objects.all().order_by('ID')
         serializer = DebateSerializer(content, many=True)
