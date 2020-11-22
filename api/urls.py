@@ -24,8 +24,12 @@ urlpatterns = [
     url(r'^counterargumentsbyid$', views.ListOfCounterArguments),
     url(r'^searchdebatesbynameandtitles$', views.SearchDebatesAPIView.as_view()),
     url(r'^GetOrCreateDebateVote$', views.GetOrCreateDebateVote),
-    url(r'^GetAllDebatesWithVotersBySideAndID$', views.GetAllDebatesWithVotersBySideAndID),
-    url(r'^GetAllArgumentsWithVotersByID$', views.GetAllArgumentsWithVotersByID),
+    url(r'^ListDebatesWithUserChoices$', views.ListDebatesWithUserChoices),
+    url(r'^ListCounterArgumentsWithUserChoices$', views.ListCounterArgumentsWithUserChoices),
+    url(r'^ListArgumentsWithUserChoices$', views.ListArgumentsWithUserChoices),
+    #url(r'^GetAllDebatesWithVotersBySideAndID$', views.GetAllDebatesWithVotersBySideAndID),
+    #url(r'^GetAllArgumentsWithVotersByID$', views.GetAllArgumentsWithVotersByID),
+    url(r'^GetTokenUsername$', views.GetTokenUsername),
     #url(r'^api/tutorials/(?P<pk>[0-9]+)$', views.tutorial_detail),
     #url(r'^api/tutorials/published$', views.tutorial_list_published)
 ]

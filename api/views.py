@@ -14,7 +14,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, VotingRightSerializer, DebateArgumentsSerializer,\
-GetCounterArgumentByArgumentIDSerializer
+GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
 Counter_argument_vote, Voting_right
 
@@ -66,10 +66,10 @@ class SearchDebatesAPIView(generics.ListCreateAPIView):
     serializer_class = DebateSerializer
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticatedOrReadOnly])
 def ListOfArguments(request):
     if request.method == 'GET':
-        user = Token.objects.get(key=request.auth.key).user_id
+        #user = Token.objects.get(key=request.auth.key).user_id
         sys.stderr.write("yolo " +str(user))
         debateid = request.query_params.get('id', None)
         side = request.query_params.get('side', None)
@@ -144,8 +144,8 @@ def GetOrCreateDebateVote(request):
             return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
-def GetAllDebatesWithVotersBySideAndID(request):
+#@permission_classes([IsAuthenticatedOrReadOnly])
+def ListDebatesWithUserChoices(request):
     key=request.auth
     user = None
     debateid = request.query_params.get('id', None)
@@ -162,7 +162,7 @@ def GetAllDebatesWithVotersBySideAndID(request):
 
 @api_view(['GET'])
 #@permission_classes([IsAuthenticated])
-def GetAllArgumentsWithVotersByID(request):
+def ListCounterArgumentsWithUserChoices(request):
     key=request.auth
     user = None
     argumentid = request.query_params.get('id', None)
@@ -171,7 +171,24 @@ def GetAllArgumentsWithVotersByID(request):
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
     if key is not None:
         user = Token.objects.get(key=key).user_id
-        return Response(Argument.objects.with_argumentlikes(argumentid, user))
+        return Response(Counter_argument.objects.with_userchoices(argumentid, user))
+    else:
+        content = Counter_argument.objects.all().order_by('ID')
+        serializer = ArgumentSerializer(content, many=True)
+        return Response(serializer.data)
+
+@api_view(['GET'])
+#@permission_classes([IsAuthenticated])
+def ListArgumentsWithUserChoices(request):
+    key=request.auth
+    user = None
+    debateid = request.query_params.get('id', None)
+    if debateid is None:
+        content = {"Bad request": "Please put an id as argument"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    if key is not None:
+        user = Token.objects.get(key=key).user_id
+        return Response(Argument.objects.with_debateargumentlikes(debateid, user))
     else:
         content = Argument.objects.all().order_by('ID')
         serializer = ArgumentSerializer(content, many=True)
@@ -193,3 +210,12 @@ def GetAllCounterArgumentsWithLikesByArgumentID(request):
         content = Argument.objects.all().order_by('ID')
         serializer = CounterArgumentSerializer(content, many=True)
         return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def GetTokenUsername(request):
+    key = request.auth
+    if key is not None:
+        return Response({#"Email": request.user.email,\
+        "NAME": request.user.first_name + " " + request.user.last_name#, "Last name": request.user.last_name\
+        })

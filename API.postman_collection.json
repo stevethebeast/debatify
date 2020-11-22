@@ -1,0 +1,343 @@
+{
+	"info": {
+		"_postman_id": "74fa0ec4-bec5-48e7-8479-26e3dc172ef8",
+		"name": "API",
+		"description": "# Introduction\nRetrieve and create Debates, Arguments and Counter arguments\n\n# Overview\nTo get arguments and counter arguments, the query syntax is different from the one getting the debates\n\n# Authentication\nNo authentication ATM\n\n# Error Codes\nYou can expect bad requests if you're not appending parameters to get arguments and counter arguments\n\n# Rate limit\nNope",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GetCounterArgumentsByID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/counterargumentsbyid?id=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"counterargumentsbyid"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				},
+				"description": "Retrieve the list of all Counterarguments of an Argument"
+			},
+			"response": []
+		},
+		{
+			"name": "GetCounterArgumentsByID Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/counterargumentsbyid?id=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"counterargumentsbyid"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				},
+				"description": "Retrieve the list of all Counterarguments of an Argument"
+			},
+			"response": []
+		},
+		{
+			"name": "GetArgumentsByDebateID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/argumentsbydebateid?id=1&side=YES",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"argumentsbydebateid"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						},
+						{
+							"key": "side",
+							"value": "YES"
+						}
+					]
+				},
+				"description": "Retrieve the list of all Counterarguments of an Argument"
+			},
+			"response": []
+		},
+		{
+			"name": "GetDebatesByID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/Debates/1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"Debates",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateDebate",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token d37932664586b6ac7e6dc05e2ecee39e0a62ae3d",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"NAME\": \"TESTDEBATE\",\r\n    \"YES_TITLE\": \"YESTEST\",\r\n    \"NO_TITLE\": \"NOTEST\",\r\n    \"CONTEXT\": \"CONTEST\",\r\n    \"PHOTO_PATH\": \"PATH\",\r\n    \"YES_SCORE\": 3,\r\n    \"NO_SCORE\": 5,\r\n    \"CONTACT_ID\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/Debates/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"Debates",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateArgument",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"TITLE\": \"ARGUMENTTEST\",\r\n    \"TEXT\": \"TESTTEXT\",\r\n    \"DEBATE_ID\": 1,\r\n    \"SCORE\": 322,\r\n    \"CONTACT_ID\": 1,\r\n    \"SIDE\": \"YES\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/Arguments/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"Arguments",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateCounterArgument",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"TITLE\": \"CATEST\",\r\n    \"TEXT\": \"TEXTTEST\",\r\n    \"ARGUMENT_ID\": 1,\r\n    \"SCORE\": 25,\r\n    \"CONTACT_ID\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/CounterArguments/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"CounterArguments",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logon",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"username\": \"JFUCKINGCHRIST12\",\"password\": \"Jesus123!\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/auth/token/login/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"auth",
+						"token",
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateNewUser",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"email\": \"madame.biatchat@gmail.com\", \"password\":\"testtestest\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/auth/users/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"auth",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetDebateVoteWithoutToken",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllDebatesWithVotersBySideAndID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllArgumentsWithVotersByID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "google",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

@@ -134,7 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://tlatter.gitlab.io/",
+    "https://tlatter.gitlab.io",
 ]
 
 # Internationalization

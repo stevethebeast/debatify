@@ -51,3 +51,6 @@ class GetCounterArgumentByArgumentIDSerializer(serializers.Serializer):
     TEXT = serializers.CharField(max_length=600)
     SCORE = serializers.IntegerField()
     Username = serializers.CharField(max_length=60)
+
+class GetTokenUsernameSerializer(serializers.Serializer):
+    EMAIL = serializers.CharField(max_length=50)

@@ -61,7 +61,7 @@ class DebateManager(models.Manager):
                 d["CREATOR_ID"] = row[6]
                 d["CREATED_AT"] = row[7]
                 d["CONTACT_ID"] = row[8]
-                d["SIDE"] = row[11]
+                d["SIDE"] = row[9]
                 objects_list.append(d)
         return objects_list
 
@@ -100,7 +100,30 @@ class ArgumentManager(models.Manager):
                 d["DEBATE_ID"] = row[7]
                 objects_list.append(d)
         return objects_list
-
+    def with_debateargumentlikes(self, argument, user):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT arg.\"ID\" ARGUMENT_ID, arg.\"TITLE\", arg.\"TEXT\", arg.\"SCORE\", arg.\"SIDE\", arg.\"CREATED_AT\", av.\"CONTACT_ID_id\" CONTACT_ID, arg.\"DEBATE_ID_id\" DEBATE_ID\
+                            FROM api_argument AS arg LEFT OUTER JOIN\
+                            (SELECT \"LIKE\", \"ARGUMENT_ID_id\" ARGUMENT_ID, \"CONTACT_ID_id\"\
+                            FROM api_argument_vote\
+                            WHERE \"CONTACT_ID_id\"=%s\
+                            ) av ON arg.\"ID\" = av.ARGUMENT_ID\
+                            WHERE arg.\"DEBATE_ID_id\"=%s;", [user, argument])
+            objects_list = []
+            for row in cursor.fetchall():
+                #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
+                d = collections.OrderedDict()
+                d["ARGUMENT_ID"] = row[0]
+                d["TITLE"] = row[1]
+                d["TEXT"] = row[2]
+                d["SCORE"] = row[3]
+                d["SIDE"] = row[4]
+                d["CREATED_AT"] = row[5]
+                d["CONTACT_ID"] = row[6]
+                d["DEBATE_ID"] = row[7]
+                objects_list.append(d)
+        return objects_list
+        
 class Argument(models.Model):
     ID = models.AutoField(primary_key=True)
     TITLE = models.CharField(max_length=200)
@@ -133,6 +156,25 @@ class CounterArgumentManager(models.Manager):
                 d["CREATED_AT"] = row[4]
                 d["CONTACT_ID"] = row[5]
                 d["ARGUMENT_ID"] = row[6]
+                objects_list.append(d)
+        return objects_list
+    def with_userchoices(self, argument, user):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT ca.\"ID\", ca.\"TITLE\", ca.\"TEXT\", ca.\"ARGUMENT_ID_id\", ca.\"SCORE\", ca.\"CONTACT_ID_id\", ca.\"CREATED_AT\"\
+                            FROM api_counter_argument ca LEFT OUTER JOIN\
+                            (SELECT \"LIKE\", \"COUNTER_ARGUMENT_ID_id\"\
+                            FROM api_counter_argument_vote\
+                            WHERE \"CONTACT_ID_id\"=%s AND \"COUNTER_ARGUMENT_ID_id\"=%s) cav ON cav.\"COUNTER_ARGUMENT_ID_id\" = ca.\"ID\";", [user, argument])
+            objects_list = []
+            for row in cursor.fetchall():
+                #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
+                d = collections.OrderedDict()
+                d["COUNTER_ARGUMENT_ID"] = row[0]
+                d["TITLE"] = row[1]
+                d["ARGUMENT_ID"] = row[2]
+                d["SCORE"] = row[3]
+                d["CONTACT_ID"] = row[4]
+                d["CREATED_AT"] = row[5]
                 objects_list.append(d)
         return objects_list
 
