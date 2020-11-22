@@ -148,10 +148,6 @@ def GetOrCreateDebateVote(request):
 def ListDebatesWithUserChoices(request):
     key=request.auth
     user = None
-    debateid = request.query_params.get('id', None)
-    if debateid is None:
-        content = {"Bad request": "Please put an id as argument"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
     if key is not None:
         user = Token.objects.get(key=key).user_id
         return Response(Debate.objects.with_debatevotes(debateid, user))
