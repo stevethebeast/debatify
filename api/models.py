@@ -164,7 +164,8 @@ class CounterArgumentManager(models.Manager):
                             FROM api_counter_argument ca LEFT OUTER JOIN\
                             (SELECT \"LIKE\", \"COUNTER_ARGUMENT_ID_id\"\
                             FROM api_counter_argument_vote\
-                            WHERE \"CONTACT_ID_id\"=%s AND \"COUNTER_ARGUMENT_ID_id\"=%s) cav ON cav.\"COUNTER_ARGUMENT_ID_id\" = ca.\"ID\";", [user, argument])
+                            WHERE \"CONTACT_ID_id\"=%s) cav ON cav.\"COUNTER_ARGUMENT_ID_id\" = ca.\"ID\"\
+                            WHERE cav.\"ARGUMENT_ID_id\"=%s;", [user, argument])
             objects_list = []
             for row in cursor.fetchall():
                 #sys.stderr.write("LINES" + str(row[0]) + str(row[1]) + str(row[2]) + str(row[3]))
