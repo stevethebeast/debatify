@@ -18,13 +18,8 @@ GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
 Counter_argument_vote, Voting_right
 
-#class ContactViewSet(viewsets.ModelViewSet):
-#    permission_classes = [IsAuthenticatedOrReadOnly]
-#    queryset = Contact.objects.all().order_by('ID')
-#    serializer_class = ContactSerializer
-
 class DebateViewSet(viewsets.ModelViewSet):
-    #permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Debate.objects.all().order_by('ID')
     serializer_class = DebateSerializer
 
@@ -39,7 +34,7 @@ class CounterArgumentViewSet(viewsets.ModelViewSet):
     serializer_class = CounterArgumentSerializer
 
 class DebateVoteViewSet(viewsets.ModelViewSet):
-    #permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Debate_vote.objects.all().order_by('ID')
     serializer_class = DebateVoteSerializer
 

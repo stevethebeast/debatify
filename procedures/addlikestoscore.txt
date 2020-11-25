@@ -1,0 +1,25 @@
+CREATE OR REPLACE FUNCTION public.addlikestoscore()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    VOLATILE
+    COST 100
+AS $BODY$
+BEGIN
+    if NEW."LIKE"=1 then
+		update api_argument 
+		set "SCORE" = "SCORE" + 1 
+		where "ID" = NEW."ARGUMENT_ID_id";
+	else
+		update api_argument 
+		set "SCORE" = "SCORE" - 1 
+		where "ID" = NEW."ARGUMENT_ID_id";
+	end if;
+    RETURN NULL;
+END;
+$BODY$;
+
+CREATE TRIGGER addlikestoscore
+    AFTER INSERT OR UPDATE 
+    ON public.api_argument_vote
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.addlikestoscore();
