@@ -1,3 +1,5 @@
+image: python:latest
+
 stages:
   - test
 
@@ -6,7 +8,7 @@ test:
   script:
     # this configures Django application to use attached postgres database that is run on `postgres` host
     - export DATABASE_URL=postgres://postgres:@postgres:5432/python-test-app
-    - apt-get update -qy
-    - apt-get install -y python-dev python-pip
+    #- apt-get update -qy
+    #- apt-get install -y python-dev python-pip
     - pip install -r requirements.txt
     - python manage.py test api.tests
