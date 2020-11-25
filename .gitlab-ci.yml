@@ -1,5 +1,6 @@
 image: python:latest
-services: postgres:latest
+services: 
+  - postgres:latest
 
 stages:
   - test
