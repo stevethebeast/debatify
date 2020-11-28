@@ -75,8 +75,6 @@ class Debate(models.Model):
     CREATOR_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     objects = DebateManager()
-    def __str__(self):
-        return self.NAME
 
 class ArgumentManager(models.Manager):
     def with_argumentlikes(self, argument, user):
@@ -134,8 +132,6 @@ class Argument(models.Model):
     SIDE = models.CharField(max_length=3)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     objects = ArgumentManager()
-    def __str__(self):
-        return self.TEXT
 
 class CounterArgumentManager(models.Manager):
     def with_counterargumentlikes(self, argument, user):
@@ -188,8 +184,6 @@ class Counter_argument(models.Model):
     CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     objects = CounterArgumentManager()
-    def __str__(self):
-        return self.TEXT
 
 class Debate_vote(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -199,8 +193,6 @@ class Debate_vote(models.Model):
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("DEBATE_ID", "CONTACT_ID"),)
-    def __str__(self):
-        return self.SIDE
 
 class Argument_vote(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -210,8 +202,6 @@ class Argument_vote(models.Model):
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("ARGUMENT_ID", "CONTACT_ID"),)
-    def __str__(self):
-        return self.LIKE
 
 class Counter_argument_vote(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -221,8 +211,6 @@ class Counter_argument_vote(models.Model):
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("COUNTER_ARGUMENT_ID", "CONTACT_ID"),)
-    def __str__(self):
-        return self.LIKE
 
 class Voting_right(models.Model):
     DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=True)
@@ -230,5 +218,3 @@ class Voting_right(models.Model):
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("DEBATE_ID", "CONTACT_ID"),)
-    def __str__(self):
-        return self.DEBATE_ID, self.CONTACT_ID
