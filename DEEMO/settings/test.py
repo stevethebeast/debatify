@@ -9,6 +9,14 @@ DEBUG = False
 ALLOWED_HOSTS = []
 
 DATABASES = {
+    'postgres': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': 'postgres',
+        'PORT': '',
+    },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'djangodb',
