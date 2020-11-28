@@ -11,11 +11,9 @@ ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': get_secret_setting('DATABASE_TEST_NAME'),
-        'USER': get_secret_setting('DATABASE_TEST_USER'),
-        'PASSWORD': get_secret_setting('DATABASE_TEST_PASSWORD'),
-        'HOST': get_secret_setting('DATABASE_TEST_HOST'),
-        'PORT': get_secret_setting('DATABASE_TEST_PORT'),
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': get_secret_setting('POSTGRES_PASSWORD'),
     }
 }
 
