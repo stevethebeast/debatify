@@ -2,10 +2,13 @@ image: python:latest
 services: 
   - postgres:latest
 variables:
+    POSTGRES_HOST: postgres
     POSTGRES_DB: postgres
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: ""
+    POSTGRES_PORT: ""
     POSTGRES_HOST_AUTH_METHOD: trust
+    SECRET_KEY: e1hw&2g1=9(5=z+_fziv5x8=^qq6tj(s66tsceh$%g%x#3%2em
 stages:
   - test
 
@@ -17,4 +20,4 @@ test:
     #- apt-get update -qy
     #- apt-get install -y python-dev python-pip
     - pip install -r requirements.txt
-    - python manage.py test api.tests --settings:DEEMO.settings.test
+    - python manage.py test api.tests --settings=DEEMO.settings.test
