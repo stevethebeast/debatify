@@ -11,8 +11,18 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 #import django_heroku
 from pathlib import Path
-import os
+import os, json
+from django.core.exceptions import ImproperlyConfigured
 
+with open(os.path.abspath("djangobin-secrets.json")) as f:
+    secrets = json.loads(f.read())
+
+
+def get_secret_setting(setting, secrets=secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        raise ImproperlyConfigured("Set the {} setting".format(setting))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -111,7 +121,7 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': 'postgres',
         'PORT': '',
-    }
+    },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'djangodb',
