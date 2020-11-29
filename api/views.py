@@ -165,7 +165,7 @@ def ListCounterArgumentsWithUserChoices(request):
         return Response(Counter_argument.objects.with_userchoices(argumentid, user))
     else:
         content = Counter_argument.objects.all().order_by('ID')
-        serializer = ArgumentSerializer(content, many=True)
+        serializer = CounterArgumentSerializer(content, many=True)
         return Response(serializer.data)
 
 @api_view(['GET'])
@@ -198,7 +198,7 @@ def GetAllCounterArgumentsWithLikesByArgumentID(request):
         user = Token.objects.get(key=key).user_id
         return Response(Counter_argument.objects.with_counterargumentlikes(counterargumentid, user))
     else:
-        content = Argument.objects.all().order_by('ID')
+        content = Counter_argument.objects.all().order_by('ID')
         serializer = CounterArgumentSerializer(content, many=True)
         return Response(serializer.data)
 
