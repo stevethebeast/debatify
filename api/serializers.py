@@ -26,7 +26,7 @@ class DebateVoteSerializer(serializers.ModelSerializer):
 class ArgumentVoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Argument_vote
-        fields = ('ID', 'ARGUMENT_ID', 'SCORE', 'CONTACT_ID')
+        fields = ('ID', 'ARGUMENT_ID', 'LIKE', 'CONTACT_ID', 'CREATED_AT')
 
 class CounterArgumentVoteSerializer(serializers.ModelSerializer):
     class Meta:

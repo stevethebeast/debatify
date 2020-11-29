@@ -72,7 +72,7 @@ class Debate(models.Model):
     NO_TITLE = models.CharField(max_length=100)
     CONTEXT = models.CharField(max_length=1000, blank=True, null=True)
     PHOTO_PATH = models.CharField(max_length=150, blank=True, null=True)
-    CREATOR_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    CREATOR_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     objects = DebateManager()
 
@@ -128,7 +128,7 @@ class Argument(models.Model):
     TEXT = models.CharField(max_length=600, blank=True, null=True)
     DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE)
     SCORE = models.IntegerField(blank=True, null=True)
-    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     SIDE = models.CharField(max_length=3)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     objects = ArgumentManager()
@@ -168,10 +168,11 @@ class CounterArgumentManager(models.Manager):
                 d = collections.OrderedDict()
                 d["ID"] = row[0]
                 d["TITLE"] = row[1]
-                d["ARGUMENT_ID"] = row[2]
-                d["SCORE"] = row[3]
-                d["CONTACT_ID"] = row[4]
-                d["CREATED_AT"] = row[5]
+                d["TEXT"] = row[2]
+                d["ARGUMENT_ID"] = row[3]
+                d["SCORE"] = row[4]
+                d["CONTACT_ID"] = row[5]
+                d["CREATED_AT"] = row[6]
                 objects_list.append(d)
         return objects_list
 
@@ -179,42 +180,42 @@ class Counter_argument(models.Model):
     ID = models.AutoField(primary_key=True)
     TITLE = models.CharField(max_length=200)
     TEXT = models.CharField(max_length=600, blank=True, null=True)
-    ARGUMENT_ID = models.ForeignKey(Argument, on_delete=models.CASCADE, blank=True, null=True)
+    ARGUMENT_ID = models.ForeignKey(Argument, on_delete=models.CASCADE, blank=True, null=False)
     SCORE = models.IntegerField(blank=True, null=True)
-    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     objects = CounterArgumentManager()
 
 class Debate_vote(models.Model):
     ID = models.AutoField(primary_key=True)
     SIDE = models.CharField(max_length=3)
-    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=True)
-    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("DEBATE_ID", "CONTACT_ID"),)
 
 class Argument_vote(models.Model):
     ID = models.AutoField(primary_key=True)
-    ARGUMENT_ID = models.ForeignKey(Argument, on_delete=models.CASCADE, blank=True, null=True)
+    ARGUMENT_ID = models.ForeignKey(Argument, on_delete=models.CASCADE, blank=True, null=False)
     LIKE = models.IntegerField()
-    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("ARGUMENT_ID", "CONTACT_ID"),)
 
 class Counter_argument_vote(models.Model):
     ID = models.AutoField(primary_key=True)
-    COUNTER_ARGUMENT_ID = models.ForeignKey(Counter_argument, on_delete=models.CASCADE, blank=True, null=True)
+    COUNTER_ARGUMENT_ID = models.ForeignKey(Counter_argument, on_delete=models.CASCADE, blank=True, null=False)
     LIKE = models.IntegerField()
-    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("COUNTER_ARGUMENT_ID", "CONTACT_ID"),)
 
 class Voting_right(models.Model):
-    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=True)
-    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("DEBATE_ID", "CONTACT_ID"),)
