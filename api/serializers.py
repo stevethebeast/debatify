@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Voting_right
+Counter_argument_vote
 
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,11 +32,6 @@ class CounterArgumentVoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Counter_argument_vote
         fields = ('ID', 'COUNTER_ARGUMENT_ID', 'SCORE', 'CONTACT_ID')
-
-class VotingRightSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Voting_right
-        fields = ('DEBATE_ID', 'CONTACT_ID')
 
 class DebateArgumentsSerializer(serializers.Serializer):
     SIDE = serializers.CharField(max_length=3)

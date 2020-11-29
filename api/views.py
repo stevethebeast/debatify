@@ -4,7 +4,7 @@ import sys
 # Create your views here.
 from rest_framework import viewsets, views, status, filters, generics
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.shortcuts import render
 from django.db.models import F
@@ -13,45 +13,112 @@ from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
-CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, VotingRightSerializer, DebateArgumentsSerializer,\
+CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, DebateArgumentsSerializer,\
 GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Voting_right
+Counter_argument_vote
 
 class DebateViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Debate.objects.all().order_by('ID')
     serializer_class = DebateSerializer
 
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CREATOR_ID'] = user
+        serializer = DebateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
 class ArgumentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Argument.objects.all().order_by('ID')
     serializer_class = ArgumentSerializer
+
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        serializer = ArgumentSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
 
 class CounterArgumentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Counter_argument.objects.all().order_by('ID')
     serializer_class = CounterArgumentSerializer
 
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        serializer = CounterArgumentSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
 class DebateVoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Debate_vote.objects.all().order_by('ID')
     serializer_class = DebateVoteSerializer
+
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        serializer = DebateVoteSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
 
 class ArgumentVoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Argument_vote.objects.all().order_by('ID')
     serializer_class = ArgumentVoteSerializer
 
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        serializer = ArgumentVoteSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
 class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Counter_argument_vote.objects.all().order_by('ID')
     serializer_class = CounterArgumentVoteSerializer
 
-class VotingRightViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Voting_right.objects.all().order_by('DEBATE_ID')
-    serializer_class = VotingRightSerializer
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        serializer = CounterArgumentVoteSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
 
 class SearchDebatesAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]

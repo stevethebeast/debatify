@@ -212,10 +212,3 @@ class Counter_argument_vote(models.Model):
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("COUNTER_ARGUMENT_ID", "CONTACT_ID"),)
-
-class Voting_right(models.Model):
-    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
-    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
-    CREATED_AT = models.DateTimeField(auto_now_add=True)
-    class Meta:
-        unique_together = (("DEBATE_ID", "CONTACT_ID"),)
