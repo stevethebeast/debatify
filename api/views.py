@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.shortcuts import render
-from django.db.models import F
+from django.db.models import F, Sum
 from django.db import connection
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
@@ -277,3 +277,15 @@ def GetTokenUsername(request):
         return Response({#"Email": request.user.email,\
         "NAME": request.user.first_name + " " + request.user.last_name#, "Last name": request.user.last_name\
         })
+
+@api_view(['GET'])
+#@permission_classes([AllowAny])
+def DebateVotesbyDebateId(request):
+    debateid = request.query_params.get('id', None)
+    if debateid is None:
+        content = {"Bad request": "Please put an id as argument"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        yes = Debate_vote.objects.filter(SIDE='YES', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
+        no = Debate_vote.objects.filter(SIDE='NO', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
+        return Response({"YES": list(yes)[0], "NO": list(no)[0]}, status= status.HTTP_200_OK,content_type='application/json')

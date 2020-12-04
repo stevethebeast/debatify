@@ -9,9 +9,9 @@ import sys
 class APItests(APITestCase):
     def setUp(self):
         User.objects.create_superuser('JesusChrist@gmail.com', 'IlikeTrains69')
-        Debate.objects.create(NAME='Legalize Marihuana', YES_TITLE='It\'s good', NO_TITLE='It\'s dangerous', CONTEXT='We live in a very boring society')
-        debate = Debate.objects.get(NAME='Legalize Marihuana')
         user = User.objects.get(email='JesusChrist@gmail.com')
+        Debate.objects.create(NAME='Legalize Marihuana', YES_TITLE='It\'s good', NO_TITLE='It\'s dangerous', CONTEXT='We live in a very boring society', CREATOR_ID=user)
+        debate = Debate.objects.get(NAME='Legalize Marihuana')
         Argument.objects.create(TITLE='No, la marihuana esta mal', TEXT='ay marica la marihuana est mal porque Pablito ha fumado un porlo y le dolio el estromago', DEBATE_ID=debate, CONTACT_ID=user, SIDE='NO')
         #User.objects.create_user('leidivelazquez@colombiamail.co', '19071969', first_name='Leidi', last_name='Velazquez')
 
@@ -110,3 +110,13 @@ class APItests(APITestCase):
         client = APIClient()
         response = client.get('/GetTokenUsername')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_debatevotesbydebateid_idprovided(self):
+        client = APIClient()
+        response = client.get('/debatevotesbydebateid?id=1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_debatevotesbydebateid_noidprovided(self):
+        client = APIClient()
+        response = client.get('/debatevotesbydebateid')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

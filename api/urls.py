@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^ListDebatesWithUserChoices$', views.ListDebatesWithUserChoices),
     url(r'^ListCounterArgumentsWithUserChoices$', views.ListCounterArgumentsWithUserChoices),
     url(r'^ListArgumentsWithUserChoices$', views.ListArgumentsWithUserChoices),
+    url(r'^debatevotesbydebateid$', views.DebateVotesbyDebateId),
     #url(r'^GetAllDebatesWithVotersBySideAndID$', views.GetAllDebatesWithVotersBySideAndID),
     #url(r'^GetAllArgumentsWithVotersByID$', views.GetAllArgumentsWithVotersByID),
     url(r'^GetTokenUsername$', views.GetTokenUsername),

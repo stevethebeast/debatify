@@ -6,6 +6,8 @@ SECRET_KEY = '8p=sgre$q3%9fc7dw#e2k0$xtrfyx=@4a(1yhd!rbdkun91nq^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+ADMIN_ENABLED = True
+
 ALLOWED_HOSTS = []
 
 DATABASES = {
@@ -20,3 +22,5 @@ DATABASES = {
 }
 
 CORS_ALLOWED_ORIGINS = []
+
+INSTALLED_APPS += ['django.contrib.admin',]

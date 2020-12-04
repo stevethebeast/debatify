@@ -16,9 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
+from django.conf import settings
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
+urlpatterns = []
+
+if settings.ADMIN_ENABLED is True:
+    urlpatterns += [path('admin/', admin.site.urls),]
+
+urlpatterns += [
     path('', include('api.urls')),
     url(r'^api/auth/', include('djoser.urls.authtoken')),
     url(r'^api/auth/', include('djoser.urls')),
