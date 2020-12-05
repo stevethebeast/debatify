@@ -31,7 +31,7 @@ class ArgumentVoteSerializer(serializers.ModelSerializer):
 class CounterArgumentVoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Counter_argument_vote
-        fields = ('ID', 'COUNTER_ARGUMENT_ID', 'SCORE', 'CONTACT_ID')
+        fields = ('ID', 'COUNTER_ARGUMENT_ID', 'LIKE', 'CONTACT_ID', 'CREATED_AT')
 
 class DebateArgumentsSerializer(serializers.Serializer):
     SIDE = serializers.CharField(max_length=3)
