@@ -10,6 +10,7 @@ from .base import *
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False)
+    CORS_ALLOW_ALL_ORIGINS=(bool,False)
 )
 
 # False if not in os.environ
