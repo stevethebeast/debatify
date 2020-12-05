@@ -30,6 +30,7 @@ class DebateViewSet(viewsets.ModelViewSet):
         data['CREATOR_ID'] = user
         serializer = DebateSerializer(data=data)
         if serializer.is_valid():
+
             serializer.save()
             return Response(serializer.data,status=201)
         else:
@@ -286,6 +287,6 @@ def DebateVotesbyDebateId(request):
         content = {"Bad request": "Please put an id as argument"}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
     else:
-        yes = Debate_vote.objects.filter(SIDE='YES', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
-        no = Debate_vote.objects.filter(SIDE='NO', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
+        yes = Debate_vote.objects.filter(SIDE='yes', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
+        no = Debate_vote.objects.filter(SIDE='no', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
         return Response({"YES": list(yes)[0], "NO": list(no)[0]}, status= status.HTTP_200_OK,content_type='application/json')
