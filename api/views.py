@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.shortcuts import render
-from django.db.models import F, Sum
+from django.db.models import F, Count
 from django.db import connection
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
@@ -287,6 +287,6 @@ def DebateVotesbyDebateId(request):
         content = {"Bad request": "Please put an id as argument"}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
     else:
-        yes = Debate_vote.objects.filter(SIDE='yes', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
-        no = Debate_vote.objects.filter(SIDE='no', DEBATE_ID=debateid).all().aggregate(Sum('DEBATE_ID')).values()
+        yes = Debate_vote.objects.filter(SIDE='yes', DEBATE_ID=debateid).all().aggregate(Count('DEBATE_ID')).values()
+        no = Debate_vote.objects.filter(SIDE='no', DEBATE_ID=debateid).all().aggregate(Count('DEBATE_ID')).values()
         return Response({"YES": list(yes)[0], "NO": list(no)[0]}, status= status.HTTP_200_OK,content_type='application/json')
