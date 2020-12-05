@@ -9,8 +9,10 @@ variables:
     POSTGRES_PORT: ""
     POSTGRES_HOST_AUTH_METHOD: trust
     SECRET_KEY: e1hw&2g1=9(5=z+_fziv5x8=^qq6tj(s66tsceh$%g%x#3%2em
+
 stages:
   - test
+  - deploy
 
 test:
   stage: test
@@ -21,3 +23,17 @@ test:
     #- apt-get install -y python-dev python-pip
     - pip install -r requirements.txt
     - python manage.py test api.tests --settings=DEEMO.settings.test
+
+Deployment:
+  image: ruby:2.4
+  stage: deploy
+  before_script:
+    - gem install dpl
+    - wget -qO- https://cli-assets.heroku.com/install-ubuntu.sh | sh
+  script:
+    - dpl --provider=heroku --app=$HEROKU_APP_PRODUCTION --api-key=$HEROKU_API_KEY
+    - export HEROKU_API_KEY=$HEROKU_API_KEY
+    - heroku run --app $HEROKU_APPNAME python manage.py migrate
+  environment:
+    name: production
+    url: $HEROKU_APP_HOST
