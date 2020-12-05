@@ -6,22 +6,22 @@ Counter_argument_vote
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Debate
-        fields = ('ID', 'NAME', 'YES_TITLE', 'NO_TITLE', 'CONTEXT', 'PHOTO_PATH', 'CREATOR_ID')
+        fields = ('ID', 'NAME', 'YES_TITLE', 'NO_TITLE', 'CONTEXT', 'PHOTO_PATH', 'IS_PUBLIC', 'CREATOR_ID', 'CREATED_AT')
 
 class ArgumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Argument
-        fields = ('ID', 'TITLE', 'TEXT', 'DEBATE_ID', 'SCORE', 'CONTACT_ID', 'SIDE')
+        fields = ('ID', 'TITLE', 'TEXT', 'DEBATE_ID', 'SCORE', 'CONTACT_ID', 'SIDE', 'CREATED_AT')
 
 class CounterArgumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Counter_argument
-        fields = ('ID', 'TITLE', 'TEXT', 'ARGUMENT_ID', 'SCORE', 'CONTACT_ID')
+        fields = ('ID', 'TITLE', 'TEXT', 'ARGUMENT_ID', 'SCORE', 'CONTACT_ID', 'CREATED_AT')
 
 class DebateVoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Debate_vote
-        fields = ('ID', 'SIDE', 'DEBATE_ID', 'CONTACT_ID')
+        fields = ('ID', 'SIDE', 'DEBATE_ID', 'CONTACT_ID', 'CREATED_AT')
 
 class ArgumentVoteSerializer(serializers.ModelSerializer):
     class Meta:

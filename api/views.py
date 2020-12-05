@@ -125,7 +125,7 @@ class SearchDebatesAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     search_fields = ['NAME', 'YES_TITLE', 'NO_TITLE']
     filter_backends = (filters.SearchFilter,)
-    queryset = Debate.objects.all()
+    queryset = Debate.objects.filter(IS_PUBLIC=1).all()
     serializer_class = DebateSerializer
 
 @api_view(['GET'])
