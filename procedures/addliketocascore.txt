@@ -2,16 +2,15 @@ CREATE OR REPLACE FUNCTION addlikestocascore()
   RETURNS trigger AS
 $addlikestocascore$
 BEGIN
-    if NEW.LIKE=1 then
+    if NEW."LIKE"=1 then
 		update api_counter_argument 
-		set SCORE = SCORE + 1 
-		where ID = NEW.COUNTER_ARGUMENT_ID_id;
+		set "SCORE" = "SCORE" + 1 
+		where "ID" = NEW."COUNTER_ARGUMENT_ID_id";
 	else
 		update api_argument 
-		set SCORE = SCORE - 1 
-		where ID = NEW.COUNTER_ARGUMENT_ID_id;
+		set "SCORE" = "SCORE" - 1 
+		where "ID" = NEW."COUNTER_ARGUMENT_ID_id";
 	end if;
-    commit;
     RETURN NEW;
 END;
 $addlikestocascore$

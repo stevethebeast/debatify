@@ -43,9 +43,9 @@ class User(AbstractUser):
 class DebateManager(models.Manager):
     def with_debatevotes(self, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\"\
+            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\", adv.\"ID\"\
                 FROM api_debate AS ad LEFT OUTER JOIN \
-                (SELECT \"DEBATE_ID_id\" DEBATE_ID, \"CONTACT_ID_id\" CONTACT_ID, \"SIDE\"\
+                (SELECT \"ID\", \"DEBATE_ID_id\" DEBATE_ID, \"CONTACT_ID_id\" CONTACT_ID, \"SIDE\"\
                 FROM api_debate_vote\
                 WHERE \"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID;", [user])
             objects_list = []
@@ -62,6 +62,7 @@ class DebateManager(models.Manager):
                 d["CREATED_AT"] = row[7]
                 d["CONTACT_ID"] = row[8]
                 d["SIDE"] = row[9]
+                d["VOTE_ID"] = row[10]
                 objects_list.append(d)
         return objects_list
 
@@ -100,9 +101,9 @@ class ArgumentManager(models.Manager):
         return objects_list
     def with_debateargumentlikes(self, argument, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT arg.\"ID\" ARGUMENT_ID, arg.\"TITLE\", arg.\"TEXT\", arg.\"SCORE\", arg.\"SIDE\", arg.\"CREATED_AT\", av.\"CONTACT_ID_id\" CONTACT_ID, arg.\"DEBATE_ID_id\" DEBATE_ID\
+            cursor.execute("SELECT arg.\"ID\" ARGUMENT_ID, arg.\"TITLE\", arg.\"TEXT\", arg.\"SCORE\", arg.\"SIDE\", arg.\"CREATED_AT\", av.\"CONTACT_ID_id\" CONTACT_ID, arg.\"DEBATE_ID_id\" DEBATE_ID, av.\"ID\", av.\"LIKE\"\
                             FROM api_argument AS arg LEFT OUTER JOIN\
-                            (SELECT \"LIKE\", \"ARGUMENT_ID_id\" ARGUMENT_ID, \"CONTACT_ID_id\"\
+                            (SELECT \"ID\", \"LIKE\", \"ARGUMENT_ID_id\" ARGUMENT_ID, \"CONTACT_ID_id\"\
                             FROM api_argument_vote\
                             WHERE \"CONTACT_ID_id\"=%s\
                             ) av ON arg.\"ID\" = av.ARGUMENT_ID\
@@ -119,6 +120,8 @@ class ArgumentManager(models.Manager):
                 d["CREATED_AT"] = row[5]
                 d["CONTACT_ID"] = row[6]
                 d["DEBATE_ID"] = row[7]
+                d["VOTE_ID"] = row[8]
+                d["LIKE"] = row[9]
                 objects_list.append(d)
         return objects_list
         
@@ -156,9 +159,9 @@ class CounterArgumentManager(models.Manager):
         return objects_list
     def with_userchoices(self, argument, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT ca.\"ID\", ca.\"TITLE\", ca.\"TEXT\", ca.\"ARGUMENT_ID_id\", ca.\"SCORE\", ca.\"CONTACT_ID_id\", ca.\"CREATED_AT\"\
+            cursor.execute("SELECT ca.\"ID\", ca.\"TITLE\", ca.\"TEXT\", ca.\"ARGUMENT_ID_id\", ca.\"SCORE\", ca.\"CONTACT_ID_id\", ca.\"CREATED_AT\", cav.\"ID\", cav.\"LIKE\"\
                             FROM api_counter_argument ca LEFT OUTER JOIN\
-                            (SELECT \"LIKE\", \"COUNTER_ARGUMENT_ID_id\"\
+                            (SELECT \"ID\",\"LIKE\", \"COUNTER_ARGUMENT_ID_id\"\
                             FROM api_counter_argument_vote\
                             WHERE \"CONTACT_ID_id\"=%s) cav ON cav.\"COUNTER_ARGUMENT_ID_id\" = ca.\"ID\"\
                             WHERE ca.\"ARGUMENT_ID_id\"=%s;", [user, argument])
@@ -173,6 +176,8 @@ class CounterArgumentManager(models.Manager):
                 d["SCORE"] = row[4]
                 d["CONTACT_ID"] = row[5]
                 d["CREATED_AT"] = row[6]
+                d["VOTE_ID"] = row[7]
+                d["LIKE"] = row[8]
                 objects_list.append(d)
         return objects_list
 
