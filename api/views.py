@@ -14,9 +14,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, DebateArgumentsSerializer,\
-GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer
+GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer, CategorySerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote
+Counter_argument_vote, Category
 
 class DebateViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -35,6 +35,11 @@ class DebateViewSet(viewsets.ModelViewSet):
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = Category.objects.all().order_by('ID')
+    serializer_class = CategorySerializer
 
 class ArgumentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
