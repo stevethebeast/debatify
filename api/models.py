@@ -43,11 +43,11 @@ class User(AbstractUser):
 class DebateManager(models.Manager):
     def with_debatevotes(self, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\", adv.\"ID\", ad.\"IS_PUBLIC\", ad.\"CATEGORY_ID_id\"\
+            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\", adv.\"ID\", ad.\"IS_PUBLIC\", ad.\"CATEGORY_ID_id\", adv.\"first_name\", adv.\"last_name\"\
                 FROM api_debate AS ad LEFT OUTER JOIN \
-                (SELECT \"ID\", \"DEBATE_ID_id\" DEBATE_ID, \"CONTACT_ID_id\" CONTACT_ID, \"SIDE\"\
-                FROM api_debate_vote\
-                WHERE \"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID \
+                (SELECT advv.\"ID\", advv.\"DEBATE_ID_id\" DEBATE_ID, advv.\"CONTACT_ID_id\" CONTACT_ID, advv.\"SIDE\", au.\"first_name\", au.\"last_name\"\
+                FROM api_debate_vote advv INNER JOIN api_user au ON advv.\"CONTACT_ID_id\" = au.\"id\"\
+                WHERE advv.\"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID \
                 WHERE ad.\"IS_PUBLIC\"=1;", [user])
             objects_list = []
             for row in cursor.fetchall():
@@ -66,6 +66,8 @@ class DebateManager(models.Manager):
                 d["VOTE_ID"] = row[10]
                 d["IS_PUBLIC"] = row[11]
                 d["CATEGORY_ID"] = row[12]
+                d["FIRST_NAME"] = row[13]
+                d["LAST_NAME"] = row[14]
                 objects_list.append(d)
         return objects_list
 
@@ -111,11 +113,11 @@ class ArgumentManager(models.Manager):
         return objects_list
     def with_debateargumentlikes(self, argument, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT arg.\"ID\" ARGUMENT_ID, arg.\"TITLE\", arg.\"TEXT\", arg.\"SCORE\", arg.\"SIDE\", arg.\"CREATED_AT\", av.\"CONTACT_ID_id\" CONTACT_ID, arg.\"DEBATE_ID_id\" DEBATE_ID, av.\"ID\", av.\"LIKE\"\
+            cursor.execute("SELECT arg.\"ID\" ARGUMENT_ID, arg.\"TITLE\", arg.\"TEXT\", arg.\"SCORE\", arg.\"SIDE\", arg.\"CREATED_AT\", av.\"CONTACT_ID_id\" CONTACT_ID, arg.\"DEBATE_ID_id\" DEBATE_ID, av.\"ID\", av.\"LIKE\", av.\"first_name\", av.\"last_name\"\
                             FROM api_argument AS arg LEFT OUTER JOIN\
-                            (SELECT \"ID\", \"LIKE\", \"ARGUMENT_ID_id\" ARGUMENT_ID, \"CONTACT_ID_id\"\
-                            FROM api_argument_vote\
-                            WHERE \"CONTACT_ID_id\"=%s\
+                            (SELECT advv.\"ID\", advv.\"LIKE\", advv.\"ARGUMENT_ID_id\" ARGUMENT_ID, advv.\"CONTACT_ID_id\", au.\"first_name\", au.\"last_name\"\
+                            FROM api_argument_vote advv, api_user au\
+                            WHERE advv.\"CONTACT_ID_id\"=%s AND advv.\"CONTACT_ID_id\"= au.\"id\"\
                             ) av ON arg.\"ID\" = av.ARGUMENT_ID\
                             WHERE arg.\"DEBATE_ID_id\"=%s;", [user, argument])
             objects_list = []
@@ -132,6 +134,8 @@ class ArgumentManager(models.Manager):
                 d["DEBATE_ID"] = row[7]
                 d["VOTE_ID"] = row[8]
                 d["LIKE"] = row[9]
+                d["FIRST_NAME"] = row[10]
+                d["LAST_NAME"] = row[11]
                 objects_list.append(d)
         return objects_list
         
@@ -169,11 +173,11 @@ class CounterArgumentManager(models.Manager):
         return objects_list
     def with_userchoices(self, argument, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT ca.\"ID\", ca.\"TITLE\", ca.\"TEXT\", ca.\"ARGUMENT_ID_id\", ca.\"SCORE\", ca.\"CONTACT_ID_id\", ca.\"CREATED_AT\", cav.\"ID\", cav.\"LIKE\"\
+            cursor.execute("SELECT ca.\"ID\", ca.\"TITLE\", ca.\"TEXT\", ca.\"ARGUMENT_ID_id\", ca.\"SCORE\", ca.\"CONTACT_ID_id\", ca.\"CREATED_AT\", cav.\"ID\", cav.\"LIKE\", cav.\"first_name\", cav.\"last_name\"\
                             FROM api_counter_argument ca LEFT OUTER JOIN\
-                            (SELECT \"ID\",\"LIKE\", \"COUNTER_ARGUMENT_ID_id\"\
-                            FROM api_counter_argument_vote\
-                            WHERE \"CONTACT_ID_id\"=%s) cav ON cav.\"COUNTER_ARGUMENT_ID_id\" = ca.\"ID\"\
+                            (SELECT \"ID\",\"LIKE\", \"COUNTER_ARGUMENT_ID_id\", au.\"first_name\", au.\"last_name\"\
+                            FROM api_counter_argument_vote advv, api_user au\
+                            WHERE advv.\"CONTACT_ID_id\"=%s AND advv.\"CONTACT_ID_id\"=au.\"id\") cav ON cav.\"COUNTER_ARGUMENT_ID_id\" = ca.\"ID\"\
                             WHERE ca.\"ARGUMENT_ID_id\"=%s;", [user, argument])
             objects_list = []
             for row in cursor.fetchall():
@@ -188,6 +192,8 @@ class CounterArgumentManager(models.Manager):
                 d["CREATED_AT"] = row[6]
                 d["VOTE_ID"] = row[7]
                 d["LIKE"] = row[8]
+                d["FIRST_NAME"] = row[9]
+                d["LAST_NAME"] = row[10]
                 objects_list.append(d)
         return objects_list
 

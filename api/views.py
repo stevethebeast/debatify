@@ -8,7 +8,8 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.shortcuts import render
 from django.db.models import F, Count
-from django.db import connection
+from django.db.models.functions import Cast
+from django.db import connection, models
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
@@ -36,8 +37,7 @@ class DebateViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=400)
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all().order_by('ID')
     serializer_class = CategorySerializer
 
@@ -220,9 +220,8 @@ def ListDebatesWithUserChoices(request):
         user = Token.objects.get(key=key).user_id
         return Response(Debate.objects.with_debatevotes(user))
     else:
-        content = Debate.objects.all().order_by('ID')
-        serializer = DebateSerializer(content, many=True)
-        return Response(serializer.data)
+        content = list(Debate.objects.annotate(FIRST_NAME=F('CREATOR_ID__first_name'),LAST_NAME=F('CREATOR_ID__last_name'),CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','NAME','YES_TITLE','NO_TITLE','CONTEXT','PHOTO_PATH','IS_PUBLIC','FIRST_NAME','LAST_NAME','CREATOR_ID','CATEGORY_ID','CREATED_AT_STR').order_by('ID'))
+        return Response(content)
 
 @api_view(['GET'])
 #@permission_classes([IsAuthenticated])
@@ -237,9 +236,8 @@ def ListCounterArgumentsWithUserChoices(request):
         user = Token.objects.get(key=key).user_id
         return Response(Counter_argument.objects.with_userchoices(argumentid, user))
     else:
-        content = Counter_argument.objects.all().order_by('ID')
-        serializer = CounterArgumentSerializer(content, many=True)
-        return Response(serializer.data)
+        content = list(Counter_argument.objects.annotate(FIRST_NAME=F('CONTACT_ID__first_name'),LAST_NAME=F('CONTACT_ID__last_name'),CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','TITLE','TEXT','ARGUMENT_ID','SCORE','CONTACT_ID','FIRST_NAME','LAST_NAME','CREATED_AT_STR').order_by('ID'))
+        return Response(content)
 
 @api_view(['GET'])
 #@permission_classes([IsAuthenticated])
@@ -254,9 +252,8 @@ def ListArgumentsWithUserChoices(request):
         user = Token.objects.get(key=key).user_id
         return Response(Argument.objects.with_debateargumentlikes(debateid, user))
     else:
-        content = Argument.objects.all().order_by('ID')
-        serializer = ArgumentSerializer(content, many=True)
-        return Response(serializer.data)
+        content = list(Argument.objects.annotate(FIRST_NAME=F('CONTACT_ID__first_name'),LAST_NAME=F('CONTACT_ID__last_name'),CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','TITLE','TEXT','DEBATE_ID','SCORE','CONTACT_ID','SIDE','FIRST_NAME','LAST_NAME','CREATED_AT_STR').order_by('ID'))
+        return Response(content)
 
 @api_view(['GET'])
 #@permission_classes([IsAuthenticated])
