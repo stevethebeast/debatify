@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.db.models import F, Count
 from django.db.models.functions import Cast
 from django.db import connection, models
+from django.core.mail import send_mail
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
@@ -327,11 +328,8 @@ def CreateUserWithConfirmation(request):
             'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
             'token':account_activation_token.make_token(createdUser),
         })
-        email = EmailMessage(
-                    mail_subject, message, to=[createdUser.email]
-        )
-        email.content_subtype = "html"
-        email.send()
+        success = send_mail(mail_subject, 
+            message, settings.EMAIL_HOST_USER, [createdUser.email], fail_silently = False)
         return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
     else:
         print(serializer.errors)

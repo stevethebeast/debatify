@@ -62,6 +62,8 @@ AUTH_USER_MODEL = 'api.User'
 
 CORS_ALLOW_ALL_ORIGINS = False
 
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 ROOT_URLCONF = 'DEEMO.urls'
 
 TEMPLATES = [
