@@ -23,4 +23,8 @@ DATABASES = {
 
 CORS_ALLOWED_ORIGINS = []
 
+DOMAIN = "http://127.0.0.1:8000"
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 INSTALLED_APPS += ['django.contrib.admin',]

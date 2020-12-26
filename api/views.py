@@ -1,5 +1,7 @@
+# SITE KEY 6LczFhIaAAAAAARMWCYvEN5-lREWVVBX0J8N4aFU
+# SECRET KEY 6LczFhIaAAAAAIVGoowshcsphaMMS1N_wh1JfvSS
 from django.shortcuts import render
-import sys
+import sys, requests, json
 
 # Create your views here.
 from rest_framework import viewsets, views, status, filters, generics
@@ -15,9 +17,21 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, DebateArgumentsSerializer,\
-GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer, CategorySerializer
+GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer, CategorySerializer, UserSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Category
+Counter_argument_vote, Category, User
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from .tokens import account_activation_token
+from django.core.mail import EmailMessage
+from django.conf import settings
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 class DebateViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -292,3 +306,57 @@ def DebateVotesbyDebateId(request):
         yes = Debate_vote.objects.filter(SIDE='yes', DEBATE_ID=debateid).all().aggregate(Count('DEBATE_ID')).values()
         no = Debate_vote.objects.filter(SIDE='no', DEBATE_ID=debateid).all().aggregate(Count('DEBATE_ID')).values()
         return Response({"YES": list(yes)[0], "NO": list(no)[0]}, status= status.HTTP_200_OK,content_type='application/json')
+
+@api_view(['POST'])
+#@permission_classes([AllowAny])
+def CreateUserWithConfirmation(request):
+    data = JSONParser().parse(request)
+    response = requests.post(settings.DOMAIN + "/api/auth/users/", data=data)
+    #sys.stderr.write("yolo " +str(data))
+    #serializer = UserSerializer(data=data)
+    if response.raise_for_status() is None:
+        resp = response.json()
+        createdUser = User.objects.get(email=resp["email"])
+        #sys.stderr.write(serializer.data)
+        #current_site = get_current_site(request)
+        #User.objects.filter(email=createdUser.email).update(is_active=False)
+        mail_subject = 'Activate your blog account.'
+        message = render_to_string('acc_active_email.html', {
+            'user': createdUser.email,
+            'domain': settings.DOMAIN,
+            'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
+            'token':account_activation_token.make_token(createdUser),
+        })
+        email = EmailMessage(
+                    mail_subject, message, to=[createdUser.email]
+        )
+        email.content_subtype = "html"
+        email.send()
+        return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
+    else:
+        print(serializer.errors)
+        return Response("serializer.errors()")
+
+def activate(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        #User.objects.filter(pk=uid).update(is_active=True)
+        user.mail_confirmed = True
+        user.save()
+        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+    else:
+        return HttpResponse('Activation link is invalid!')
+
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        data = JSONParser().parse(request)
+        user = authenticate(email=data["email"], password=data["password"])
+        if user is not None and user.mail_confirmed is True:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        else:
+            return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)

@@ -1,7 +1,7 @@
 from django.urls import include, path
 from django.conf.urls import url
 from rest_framework import routers
-from . import views
+from . import views, tokens
 
 router = routers.DefaultRouter()
 #router.register(r'Contacts', views.ContactViewSet)
@@ -28,9 +28,12 @@ urlpatterns = [
     url(r'^ListCounterArgumentsWithUserChoices$', views.ListCounterArgumentsWithUserChoices),
     url(r'^ListArgumentsWithUserChoices$', views.ListArgumentsWithUserChoices),
     url(r'^debatevotesbydebateid$', views.DebateVotesbyDebateId),
+    url(r'^createuser/$', views.CreateUserWithConfirmation),
     #url(r'^GetAllDebatesWithVotersBySideAndID$', views.GetAllDebatesWithVotersBySideAndID),
     #url(r'^GetAllArgumentsWithVotersByID$', views.GetAllArgumentsWithVotersByID),
     url(r'^GetTokenUsername$', views.GetTokenUsername),
+    path(r'activate/<uidb64>/<token>/', views.activate, name='activate'),
+    path('api-token-auth/', views.CustomAuthToken.as_view()),
     #url(r'^api/tutorials/(?P<pk>[0-9]+)$', views.tutorial_detail),
     #url(r'^api/tutorials/published$', views.tutorial_list_published)
 ]

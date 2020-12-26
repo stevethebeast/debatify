@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Category
+Counter_argument_vote, Category, User
 
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,6 +17,11 @@ class ArgumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Argument
         fields = ('ID', 'TITLE', 'TEXT', 'DEBATE_ID', 'SCORE', 'CONTACT_ID', 'SIDE', 'CREATED_AT')
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'password', 'last_login', 'is_superuser', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', 'email', 'mail_confirmed')
 
 class CounterArgumentSerializer(serializers.ModelSerializer):
     class Meta:

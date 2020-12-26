@@ -1,2 +1,3 @@
 api/__pycache__/*
-api/migrations/*
+api/migrations/__pycache__/*
+DEEMO/settings/__pycache__/*
