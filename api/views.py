@@ -1,7 +1,7 @@
 # SITE KEY 6LczFhIaAAAAAARMWCYvEN5-lREWVVBX0J8N4aFU
 # SECRET KEY 6LczFhIaAAAAAIVGoowshcsphaMMS1N_wh1JfvSS
 from django.shortcuts import render
-import sys, requests, json
+import sys, requests, json, urllib.request
 
 # Create your views here.
 from rest_framework import viewsets, views, status, filters, generics
@@ -23,6 +23,7 @@ from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vo
 Counter_argument_vote, Category, User
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
@@ -31,6 +32,7 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.template import loader
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
@@ -328,12 +330,11 @@ def CreateUserWithConfirmation(request):
             'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
             'token':account_activation_token.make_token(createdUser),
         })
-        success = send_mail(mail_subject, 
+        send_mail(mail_subject, 
             message, settings.EMAIL_HOST_USER, [createdUser.email], fail_silently = False)
         return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
     else:
-        print(serializer.errors)
-        return Response("serializer.errors()")
+        return Response("Error sending mail")
 
 def activate(request, uidb64, token):
     try:
@@ -358,3 +359,23 @@ class CustomAuthToken(ObtainAuthToken):
             return Response({'token': token.key})
         else:
             return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)
+
+def contact(request):
+    return render(request, 'contact.html')
+
+@api_view(('POST',))
+def recaptcha_valid(request):
+    recaptcha_response = request.POST.get('g-recaptcha-response')
+    url = 'https://www.google.com/recaptcha/api/siteverify'
+    payload = {
+        'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+        'response': recaptcha_response
+    }
+    data = urllib.parse.urlencode(payload).encode()
+    req = urllib.request.Request(url, data=data)
+    response = urllib.request.urlopen(req)
+    result = json.loads(response.read().decode())
+    if result['success']:
+        return Response({"Recaptcha status":"Success"})
+    else:
+        return Response({"Recaptcha status":"Error"})

@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^GetTokenUsername$', views.GetTokenUsername),
     path(r'activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('api-token-auth/', views.CustomAuthToken.as_view()),
+    path('contact/', views.contact),
+    path('testRECAPTCHA/', views.recaptcha_valid),
     #url(r'^api/tutorials/(?P<pk>[0-9]+)$', views.tutorial_detail),
     #url(r'^api/tutorials/published$', views.tutorial_list_published)
 ]
