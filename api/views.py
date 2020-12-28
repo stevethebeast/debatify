@@ -365,17 +365,16 @@ def contact(request):
 
 @api_view(('POST',))
 def recaptcha_valid(request):
-    recaptcha_response = request.POST.get('g-recaptcha-response')
-    url = 'https://www.google.com/recaptcha/api/siteverify'
+    data = JSONParser().parse(request)
+    recaptcha_response = data['g-recaptcha-response']
     payload = {
         'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
         'response': recaptcha_response
     }
-    data = urllib.parse.urlencode(payload).encode()
-    req = urllib.request.Request(url, data=data)
-    response = urllib.request.urlopen(req)
-    result = json.loads(response.read().decode())
+    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
+    result = r.json()
     if result['success']:
-        return Response({"Recaptcha status":"Success"})
+        response = requests.post(settings.DOMAIN + "/api/auth/users/", data=data)
+        return Response(response)
     else:
         return Response({"Recaptcha status":"Error"})
