@@ -341,7 +341,7 @@ def DebateVotesbyDebateId(request):
 @api_view(['POST'])
 #@permission_classes([AllowAny])
 def CreateUserWithConfirmation(request):
-    data = JSONParser().parse(request)
+    data = request.data
     response = requests.post(settings.DOMAIN + "/api/auth/users/", data=data)
     #sys.stderr.write("yolo " +str(data))
     #serializer = UserSerializer(data=data)
@@ -393,7 +393,7 @@ def contact(request):
 
 @api_view(('POST',))
 def recaptcha_valid(request):
-    data = JSONParser().parse(request)
+    data = request.data
     recaptcha_response = data['g-recaptcha-response']
     payload = {
         'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
@@ -402,6 +402,7 @@ def recaptcha_valid(request):
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
     result = r.json()
     sys.stderr.write(result['success'])
+    sys.stderr.write(result['error-codes'])
     if result['success']:
         response = requests.post(settings.DOMAIN + "/createuser/", data=data)
         return Response(response)
