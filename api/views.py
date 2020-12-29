@@ -342,12 +342,13 @@ def DebateVotesbyDebateId(request):
 #@permission_classes([AllowAny])
 def CreateUserWithConfirmation(request):
     data = request.data
-    response = requests.post(settings.DOMAIN + "/api/auth/users/", data=data)
+    #response = requests.post(settings.DOMAIN + "/api/auth/users/", data=data)
+    response = User.objects.create_user(data["email"], data["password"], first_name=data["first_name"], last_name=data["last_name"])
     #sys.stderr.write("yolo " +str(data))
     #serializer = UserSerializer(data=data)
-    if response.raise_for_status() is None:
-        resp = response.json()
-        createdUser = User.objects.get(email=resp["email"])
+    if response is not None:
+        #resp = response.json()
+        createdUser = User.objects.get(email=response.email)
         #sys.stderr.write(serializer.data)
         #current_site = get_current_site(request)
         #User.objects.filter(email=createdUser.email).update(is_active=False)
