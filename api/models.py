@@ -234,3 +234,10 @@ class Counter_argument_vote(models.Model):
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (("COUNTER_ARGUMENT_ID", "CONTACT_ID"),)
+
+class ChatComment(models.Model):
+    ID = models.AutoField(primary_key=True)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
+    DATE = models.DateTimeField()
+    TEXT = models.CharField(max_length=600, blank=True, null=True)
+    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)

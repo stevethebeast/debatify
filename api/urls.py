@@ -12,6 +12,7 @@ router.register(r'DebateVotes', views.DebateVoteViewSet)
 router.register(r'ArgumentVotes', views.ArgumentVoteViewSet)
 router.register(r'CounterArgumentVotes', views.CounterArgumentVoteViewSet)
 router.register(r'Category', views.CategoryViewSet)
+router.register(r'ChatComments', views.ChatCommentViewSet)
 #router.register(r'UserGrhellooupContacts', views.hello, basename= 'test')
 #router.register(r'test', views.hello)
 

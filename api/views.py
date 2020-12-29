@@ -1,7 +1,7 @@
 # SITE KEY 6LczFhIaAAAAAARMWCYvEN5-lREWVVBX0J8N4aFU
 # SECRET KEY 6LczFhIaAAAAAIVGoowshcsphaMMS1N_wh1JfvSS
 from django.shortcuts import render
-import sys, requests, json, urllib.request
+import sys, requests, json, urllib.request, time
 
 # Create your views here.
 from rest_framework import viewsets, views, status, filters, generics
@@ -17,10 +17,10 @@ from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
-CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer, DebateArgumentsSerializer,\
-GetCounterArgumentByArgumentIDSerializer, GetTokenUsernameSerializer, CategorySerializer, UserSerializer
+CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer,\
+CategorySerializer, UserSerializer, ChatCommentSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Category, User
+Counter_argument_vote, Category, User, ChatComment
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -35,6 +35,9 @@ from django.conf import settings
 from django.template import loader
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from datetime import datetime
+
+ChatCommentsList = []
 
 class DebateViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -140,6 +143,31 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
+class ChatCommentViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = ChatComment.objects.all().order_by('ID')
+    serializer_class = ChatCommentSerializer
+
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        data['DATE'] = datetime.now()
+        serializer = ChatCommentSerializer(data=data)
+        if serializer.is_valid():
+            global ChatCommentsList
+            ChatCommentsList += [data]
+            sys.stderr.write(str(len(ChatCommentsList)))
+            if len(ChatCommentsList) >= 50:
+                AllSerializer = ChatCommentSerializer(data=ChatCommentsList, many=True)
+                if AllSerializer.is_valid():
+                    AllSerializer.save()
+                    return Response({"Response":"Collection added"},status=201)
+            return Response(serializer.data,status=200)
         else:
             return Response(serializer.errors, status=400)
 
@@ -374,7 +402,7 @@ def recaptcha_valid(request):
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
     result = r.json()
     if result['success']:
-        response = requests.post(settings.DOMAIN + "/api/auth/users/", data=data)
+        response = requests.post(settings.DOMAIN + "/createuser/", data=data)
         return Response(response)
     else:
         return Response({"Recaptcha status":"Error"})
