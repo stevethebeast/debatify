@@ -405,6 +405,7 @@ def recaptcha_valid(request):
     }
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
     result = r.json()
+    sys.stderr.write(result['success'])
     if result['success']:
         response = requests.post(settings.DOMAIN + "/createuser/", data=data)
         return Response(response)
