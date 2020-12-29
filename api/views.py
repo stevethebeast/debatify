@@ -406,3 +406,20 @@ def recaptcha_valid(request):
         return Response(response)
     else:
         return Response({"Recaptcha status":"Error"})
+
+@api_view(('GET',))
+def UserHistory(request):
+    permission_classes = [IsAuthenticated]
+    key = request.auth
+    user = Token.objects.get(key=key).user_id
+    #Argument_vote.objects.filter(CONTACT_ID=user).annotate(ARGUMENT_VOTE_ID="ID", ARGUMENT_VOTE_LIKE="LIKE", ARGUMENT_VOTE_ARGUMENTID="ARGUMENT_ID", ARGUMENTVOTECREATE="CREATED_AT").values("ID", "LIKE", "ARGUMENT_ID", "CREATED_AT").order_by('-CREATED_AT')
+    argvotes = Argument_vote.objects.filter(CONTACT_ID=user).values("ID", "LIKE", "ARGUMENT_ID", "CREATED_AT").order_by('-CREATED_AT')
+    #Counter_argument_vote.objects.filter(CONTACT_ID=user).annotate(COUNTER_ARGUMENT_VOTE_ID="ID", COUNTER_ARGUMENT_VOTE_LIKE="LIKE", COUNTER_ARGUMENT_VOTE_COUNTERARGUMENT_ID="COUNTER_ARGUMENT_ID", COUNTERARGUMENTVOTECREATE="CREATED_AT").values("COUNTER_ARGUMENT_VOTE_ID", "COUNTER_ARGUMENT_VOTE_LIKE", "COUNTER_ARGUMENT_VOTE_COUNTERARGUMENT_ID", "COUNTERARGUMENTVOTECREATE").order_by('-CREATED_AT')
+    cargvotes = Counter_argument_vote.objects.filter(CONTACT_ID=user).values("ID", "LIKE", "COUNTER_ARGUMENT_ID", "CREATED_AT").order_by('-CREATED_AT')
+    #Debate_vote.objects.filter(CONTACT_ID=user).annotate(DEBATE_VOTE_ID="ID", DEBATE_VOTE_SIDE="SIDE", DEBATEVOTECREATE="CREATED_AT", DEBATE_VOTE_DEBATEID="DEBATE_ID").values("DEBATE_VOTE_ID", "DEBATE_VOTE_SIDE", "DEBATEVOTECREATE", "DEBATE_VOTE_DEBATEID").order_by('-CREATED_AT')
+    debvotes = Debate_vote.objects.filter(CONTACT_ID=user).values("ID", "SIDE", "CREATED_AT", "DEBATE_ID").order_by('-CREATED_AT')
+    debs = Debate.objects.filter(CREATOR_ID=user).values("ID", "NAME", "YES_TITLE", "NO_TITLE", "CONTEXT", "PHOTO_PATH", "IS_PUBLIC", "CREATED_AT").order_by('-CREATED_AT')
+    args = Argument.objects.filter(CONTACT_ID=user).values("ID", "TITLE", "TEXT", "SCORE", "SIDE", "CREATED_AT", "DEBATE_ID").order_by('-CREATED_AT')
+    cargs = Counter_argument.objects.filter(CONTACT_ID=user).values("ID", "TITLE", "TEXT", "SCORE", "CREATED_AT", "ARGUMENT_ID").order_by('-CREATED_AT')
+    res = {"Argument_votes": argvotes, "Counter_Argument_Votes": cargvotes, "Debate_votes": debvotes, "Debates": debs, "Arguments": args, "Counter_arguments": cargs}
+    return Response(res)

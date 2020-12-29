@@ -33,6 +33,7 @@ urlpatterns = [
     #url(r'^GetAllDebatesWithVotersBySideAndID$', views.GetAllDebatesWithVotersBySideAndID),
     #url(r'^GetAllArgumentsWithVotersByID$', views.GetAllArgumentsWithVotersByID),
     url(r'^GetTokenUsername$', views.GetTokenUsername),
+    url(r'^GetUserHistory$', views.UserHistory),
     path(r'activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('api-token-auth/', views.CustomAuthToken.as_view()),
     path('contact/', views.contact),
