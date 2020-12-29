@@ -12,18 +12,10 @@
         Please write your name, email address and a message below if you have any questions.
         One of our staff members will be happy to contact you directly and answer your questions as soon as possible. 
     </p>
-    <form method="post" action="/createusercpt/">
+    <form method="post" action="/testRECAPTCHA/">
     {% csrf_token %}
         {{form.as_p}}
         <!--add the reCAPTCHA Privacy and Terms of Service disclosure-->
-        <label for="recipient-email" class="col-form-label">First name</label>
-        <input name="first_name" type="text" class="form-control" id="create-account-name" required>
-        <label for="recipient-email" class="col-form-label">last name</label>
-        <input name="last_name" type="text" class="form-control" id="create-account-name" required>
-        <label for="recipient-email" class="col-form-label">Email</label>
-        <input name="email" type="email" class="form-control" id="create-account-email" required>
-        <label for="recipient-password" class="col-form-label">password</label>
-        <input name="password" type="password" class="form-control" id="create-account-password" minlength="8" required>
         <div class="g-recaptcha" data-sitekey="6LfGCBcaAAAAAC8RJFr4a6SVLi_qZlethwws4PJi"></div>
         <button type="submit">Submit</button>
     </form>

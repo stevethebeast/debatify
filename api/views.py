@@ -341,8 +341,8 @@ def DebateVotesbyDebateId(request):
 @api_view(['POST'])
 #@permission_classes([AllowAny])
 def CreateUserWithConfirmation(request):
-    #data = JSONParser().parse(request.data)
-    response = requests.post(settings.DOMAIN + "/api/auth/users/", data=request.data)
+    data = JSONParser().parse(request)
+    response = requests.post(settings.DOMAIN + "/api/auth/users/", data=data)
     #sys.stderr.write("yolo " +str(data))
     #serializer = UserSerializer(data=data)
     if response.raise_for_status() is None:
@@ -393,15 +393,11 @@ def contact(request):
 
 @api_view(('POST',))
 def recaptcha_valid(request):
-    email = request.POST.get("email")
-    first_name = request.POST.get("first_name")
-    last_name = request.POST.get("last_name")
-    grecaptcharesponse = request.POST.get("g-recaptcha-response")
-    password = request.POST.get("password")
-    data = {"email": email, "first_name": first_name, "last_name": last_name, "g-recaptcha-response": grecaptcharesponse, "password": password}
+    data = JSONParser().parse(request)
+    recaptcha_response = data['g-recaptcha-response']
     payload = {
         'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
-        'response': request.POST.get("g-recaptcha-response")
+        'response': recaptcha_response
     }
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
     result = r.json()
@@ -428,8 +424,3 @@ def UserHistory(request):
     cargs = Counter_argument.objects.filter(CONTACT_ID=user).values("ID", "TITLE", "TEXT", "SCORE", "CREATED_AT", "ARGUMENT_ID").order_by('-CREATED_AT')
     res = {"Argument_votes": argvotes, "Counter_Argument_Votes": cargvotes, "Debate_votes": debvotes, "Debates": debs, "Arguments": args, "Counter_arguments": cargs}
     return Response(res)
-
-@api_view(('GET',))
-def ListMostDebatedWithUserChoices(request):
-    permission_classes = [IsAuthenticated]
-
