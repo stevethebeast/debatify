@@ -33,12 +33,13 @@ GOOGLE_RECAPTCHA_SECRET_KEY = env("GOOGLE_RECAPTCHA_SECRET_KEY")
 
 response = requests.get("https://mailtrap.io/api/v1/inboxes.json?api_token=" + env("MAILTRAP_API_TOKEN"))
 credentials = response.json()[0]
+DEFAULT_FROM_EMAIL = credentials['username']
+SERVER_EMAIL = credentials['username']
 EMAIL_HOST = credentials['domain']
 EMAIL_HOST_USER = credentials['username']
 EMAIL_HOST_PASSWORD = credentials['password']
 EMAIL_PORT = credentials['smtp_ports'][0]
 EMAIL_USE_TLS = env("EMAIL_USE_TLS")
-EMAIL_USE_SSL = env("EMAIL_USE_SSL")
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
 DATABASES = {
