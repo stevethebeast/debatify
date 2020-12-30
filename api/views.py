@@ -400,7 +400,7 @@ def recaptcha_valid(request):
         try:
             response = User.objects.create_user(data["email"], data["password"], first_name=data["first_name"], last_name=data["last_name"])
         except IntegrityError as e:
-            return Response({"Error": e.message}, status=400)
+            return Response({"Error": "User already exists"}, status=400)
         if response is not None:
             createdUser = User.objects.get(email=response.email)
             mail_subject = 'Activate your blog account.'
