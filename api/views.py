@@ -410,6 +410,10 @@ def recaptcha_valid(request):
                 'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
                 'token':account_activation_token.make_token(createdUser),
             })
+            sys.stderr.write("MAIL SUBJECT " + mail_subject)
+            sys.stderr.write("USER " + createdUser.email)
+            sys.stderr.write("DOMAIN " + settings.DOMAIN)
+            sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
             send_mail(mail_subject, 
                 message, settings.EMAIL_HOST_USER, [createdUser.email], fail_silently = False)
             return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
