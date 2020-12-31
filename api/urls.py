@@ -12,7 +12,7 @@ router.register(r'DebateVotes', views.DebateVoteViewSet)
 router.register(r'ArgumentVotes', views.ArgumentVoteViewSet)
 router.register(r'CounterArgumentVotes', views.CounterArgumentVoteViewSet)
 router.register(r'Category', views.CategoryViewSet)
-router.register(r'ChatComments', views.ChatCommentViewSet)
+router.register(r'ChatComments', views.ChatCommentViewSet, basename="ChatCommentViewSet")
 #router.register(r'UserGrhellooupContacts', views.hello, basename= 'test')
 #router.register(r'test', views.hello)
 
@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'^ListCounterArgumentsWithUserChoices$', views.ListCounterArgumentsWithUserChoices),
     url(r'^ListArgumentsWithUserChoices$', views.ListArgumentsWithUserChoices),
     url(r'^debatevotesbydebateid$', views.DebateVotesbyDebateId),
-    url(r'^createuser/$', views.CreateUserWithConfirmation),
+    #url(r'^createuser/$', views.CreateUserWithConfirmation),
     #url(r'^GetAllDebatesWithVotersBySideAndID$', views.GetAllDebatesWithVotersBySideAndID),
     #url(r'^GetAllArgumentsWithVotersByID$', views.GetAllArgumentsWithVotersByID),
     url(r'^GetTokenUsername$', views.GetTokenUsername),

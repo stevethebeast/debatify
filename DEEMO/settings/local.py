@@ -1,5 +1,5 @@
 from .base import *
-import os
+import os, requests
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '8p=sgre$q3%9fc7dw#e2k0$xtrfyx=@4a(1yhd!rbdkun91nq^'
@@ -28,13 +28,15 @@ CORS_ALLOWED_ORIGINS = []
 
 DOMAIN = "http://127.0.0.1:8000"
 
-DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_HOST_USER")
-SERVER_EMAIL = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST = "smtp.gmail.com"
+response = requests.get("https://mailtrap.io/api/v1/inboxes.json?api_token=" + "9b8bb8bfca740b8ff0b91cb642610cb0")
+credentials = response.json()[0]
+#DEFAULT_FROM_EMAIL = credentials['username']
+#SERVER_EMAIL = credentials['username']
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = credentials['domain']
+EMAIL_HOST_USER = credentials['username']
+EMAIL_HOST_PASSWORD = credentials['password']
+EMAIL_PORT = credentials['smtp_ports'][0]
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_PORT = 587
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 INSTALLED_APPS += ['django.contrib.admin',]

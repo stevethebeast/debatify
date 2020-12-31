@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.db.models import F, Count
 from django.db.models.functions import Cast
 from django.db import connection, models, IntegrityError
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
@@ -146,10 +146,23 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=400)
 
-class ChatCommentViewSet(viewsets.ModelViewSet):
+class ChatCommentViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = ChatComment.objects.all().order_by('ID')
-    serializer_class = ChatCommentSerializer
+    def list(self, request):
+        debateid = request.query_params.get('id', None)
+        alli = request.query_params.get('all', None)
+        if debateid is None:
+            return Response("Please put a debate id in your query")
+        if debateid is not None and str(alli) == "True":
+            queryset = ChatComment.objects.filter(DEBATE_ID=debateid).order_by('ID')
+            serializer = ChatCommentSerializer(queryset, many=True)
+            return Response(serializer.data)
+        elif debateid is not None and alli != True:
+            AllSerializer = ChatCommentSerializer(data=ChatCommentsList, many=True)
+            if AllSerializer.is_valid():
+                return Response(AllSerializer.data)
+            else:
+                return Response("Invalid data")
 
     def create(self, request):
         key=request.auth
@@ -166,6 +179,7 @@ class ChatCommentViewSet(viewsets.ModelViewSet):
                 AllSerializer = ChatCommentSerializer(data=ChatCommentsList, many=True)
                 if AllSerializer.is_valid():
                     AllSerializer.save()
+                    ChatCommentsList = []
                     return Response({"Response":"Collection added"},status=201)
             return Response(serializer.data,status=200)
         else:
@@ -337,26 +351,6 @@ def DebateVotesbyDebateId(request):
         yes = Debate_vote.objects.filter(SIDE='yes', DEBATE_ID=debateid).all().aggregate(Count('DEBATE_ID')).values()
         no = Debate_vote.objects.filter(SIDE='no', DEBATE_ID=debateid).all().aggregate(Count('DEBATE_ID')).values()
         return Response({"YES": list(yes)[0], "NO": list(no)[0]}, status= status.HTTP_200_OK,content_type='application/json')
-
-@api_view(['POST'])
-#@permission_classes([AllowAny])
-def CreateUserWithConfirmation(request):
-    data = request.data
-    response = User.objects.create_user(data["email"], data["password"], first_name=data["first_name"], last_name=data["last_name"])
-    if response is not None:
-        createdUser = User.objects.get(email=response.email)
-        mail_subject = 'Activate your blog account.'
-        message = render_to_string('acc_active_email.html', {
-            'user': createdUser.email,
-            'domain': settings.DOMAIN,
-            'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
-            'token':account_activation_token.make_token(createdUser),
-        })
-        send_mail(mail_subject, 
-            message, settings.EMAIL_HOST_USER, [createdUser.email], fail_silently = False)
-        return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
-    else:
-        return Response("Error sending mail")
 
 def activate(request, uidb64, token):
     try:
