@@ -51,11 +51,15 @@ class DebateViewSet(viewsets.ModelViewSet):
         data['CREATOR_ID'] = user
         serializer = DebateSerializer(data=data)
         if serializer.is_valid():
-
             serializer.save()
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
+
+class DebateTop20ActivityViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = Debate.objects.all().order_by('-ACTIVITY_SCORE')[:20]
+    serializer_class = DebateSerializer
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all().order_by('ID')
@@ -74,6 +78,7 @@ class ArgumentViewSet(viewsets.ModelViewSet):
         serializer = ArgumentSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            Debate.objects.filter(ID=data["DEBATE_ID"]).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -91,6 +96,8 @@ class CounterArgumentViewSet(viewsets.ModelViewSet):
         serializer = CounterArgumentSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            argu = Argument.objects.filter(pk=data['ARGUMENT_ID']).values('DEBATE_ID').last()
+            Debate.objects.filter(ID=argu['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -108,6 +115,7 @@ class DebateVoteViewSet(viewsets.ModelViewSet):
         serializer = DebateVoteSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            Debate.objects.filter(ID=data['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -125,6 +133,8 @@ class ArgumentVoteViewSet(viewsets.ModelViewSet):
         serializer = ArgumentVoteSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            argu = Argument.objects.filter(pk=data['ARGUMENT_ID']).values('DEBATE_ID').last()
+            Debate.objects.filter(ID=argu['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -142,6 +152,9 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
         serializer = CounterArgumentVoteSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            cargu = Counter_argument.objects.filter(pk=data['COUNTER_ARGUMENT_ID']).values('ARGUMENT_ID').last()
+            argu = Argument.objects.filter(pk=cargu['ARGUMENT_ID']).values('DEBATE_ID').last()
+            Debate.objects.filter(ID=argu['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -174,7 +187,7 @@ class ChatCommentViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             global ChatCommentsList
             ChatCommentsList += [data]
-            sys.stderr.write(str(len(ChatCommentsList)))
+            #sys.stderr.write(str(len(ChatCommentsList)))
             if len(ChatCommentsList) >= 50:
                 AllSerializer = ChatCommentSerializer(data=ChatCommentsList, many=True)
                 if AllSerializer.is_valid():
@@ -191,52 +204,6 @@ class SearchDebatesAPIView(generics.ListCreateAPIView):
     filter_backends = (filters.SearchFilter,)
     queryset = Debate.objects.filter(IS_PUBLIC=1).all()
     serializer_class = DebateSerializer
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def ListOfArguments(request):
-    if request.method == 'GET':
-        #user = Token.objects.get(key=request.auth.key).user_id
-        sys.stderr.write("yolo " +str(user))
-        debateid = request.query_params.get('id', None)
-        side = request.query_params.get('side', None)
-        if debateid and side is None:
-            arguments = Argument.objects.annotate(Username=F('CONTACT_ID__email')).values('SIDE','ID','TITLE','TEXT','SCORE','Username')
-        elif debateid is None:
-            arguments = Argument.objects.filter(DEBATE_ID=debateid).annotate(Username=F('CONTACT_ID__email')).values('SIDE','ID','TITLE','TEXT','SCORE','Username')
-        elif side is None:
-            arguments = Argument.objects.filter(SIDE=side).annotate(Username=F('CONTACT_ID__email')).values('SIDE','ID','TITLE','TEXT','SCORE','Username')
-        else:
-            arguments = Argument.objects.all().annotate(Username=F('CONTACT_ID__email')).values('SIDE','ID','TITLE','TEXT','SCORE','Username')
-        #♣sys.stderr.write(arguments)
-        arguments_serializer = DebateArgumentsSerializer(arguments, many=True)
-        return Response(arguments_serializer.data)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def ListOfCounterArguments(request):
-    if request.method == 'GET':
-        argumentid = request.query_params.get('id', None)
-        if argumentid is None:
-            content = {"Bad request": "Please put an id as argument"}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            counterarguments = Counter_argument.objects.filter(ARGUMENT_ID=argumentid).annotate(Username=F('CONTACT_ID__NAME')).values('ID','TITLE','TEXT','SCORE','Username')
-        counterarguments_serializer = GetCounterArgumentByArgumentIDSerializer(counterarguments, many=True)
-        return Response(counterarguments_serializer.data)
-
-@api_view(['GET','POST'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def GetOrCreateUser(request):
-    if request.method == 'GET':
-        argumentid = request.query_params.get('id', None)
-        if argumentid is None:
-            content = {"Bad request": "Please put an id as argument"}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            counterarguments = Counter_argument.objects.filter(ARGUMENT_ID=argumentid).annotate(Username=F('CONTACT_ID__NAME')).values('ID','TITLE','TEXT','SCORE','Username')
-        counterarguments_serializer = GetCounterArgumentByArgumentIDSerializer(counterarguments, many=True)
-        return Response(counterarguments_serializer.data)
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticatedOrReadOnly])

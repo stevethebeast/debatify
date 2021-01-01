@@ -13,6 +13,7 @@ router.register(r'ArgumentVotes', views.ArgumentVoteViewSet)
 router.register(r'CounterArgumentVotes', views.CounterArgumentVoteViewSet)
 router.register(r'Category', views.CategoryViewSet)
 router.register(r'ChatComments', views.ChatCommentViewSet, basename="ChatCommentViewSet")
+router.register(r'DebateTop20byActivity', views.DebateTop20ActivityViewSet)
 #router.register(r'UserGrhellooupContacts', views.hello, basename= 'test')
 #router.register(r'test', views.hello)
 
@@ -21,8 +22,8 @@ router.register(r'ChatComments', views.ChatCommentViewSet, basename="ChatComment
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^argumentsbydebateid$', views.ListOfArguments),
-    url(r'^counterargumentsbyid$', views.ListOfCounterArguments),
+    #url(r'^argumentsbydebateid$', views.ListOfArguments),
+    #url(r'^counterargumentsbyid$', views.ListOfCounterArguments),
     url(r'^searchdebatesbynameandtitles$', views.SearchDebatesAPIView.as_view()),
     url(r'^GetOrCreateDebateVote$', views.GetOrCreateDebateVote),
     url(r'^ListDebatesWithUserChoices$', views.ListDebatesWithUserChoices),

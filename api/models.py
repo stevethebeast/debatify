@@ -88,6 +88,7 @@ class Debate(models.Model):
     CREATOR_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CATEGORY_ID = models.ForeignKey(Category, default=1, null=False, on_delete=models.CASCADE)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
+    ACTIVITY_SCORE = models.IntegerField(default=0)
     objects = DebateManager()
 
 class ArgumentManager(models.Manager):
@@ -238,6 +239,7 @@ class Counter_argument_vote(models.Model):
 class ChatComment(models.Model):
     ID = models.AutoField(primary_key=True)
     CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
+    CONTACT_NAME = models.CharField(max_length=50, blank=True, null=True)
     DATE = models.DateTimeField()
     TEXT = models.CharField(max_length=600, blank=True, null=True)
     DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
