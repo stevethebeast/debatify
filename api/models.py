@@ -89,6 +89,8 @@ class Debate(models.Model):
     CATEGORY_ID = models.ForeignKey(Category, default=1, null=False, on_delete=models.CASCADE)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     ACTIVITY_SCORE = models.IntegerField(default=0)
+    LATITUDE = models.FloatField(null=True)
+    LONGITUDE = models.FloatField(null=True)
     objects = DebateManager()
 
 class ArgumentManager(models.Manager):
