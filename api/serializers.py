@@ -17,6 +17,7 @@ class ArgumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Argument
         fields = '__all__'
+        read_only_fields = ('SCORE')
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

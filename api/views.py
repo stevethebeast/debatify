@@ -1,5 +1,3 @@
-# SITE KEY 6LczFhIaAAAAAARMWCYvEN5-lREWVVBX0J8N4aFU
-# SECRET KEY 6LczFhIaAAAAAIVGoowshcsphaMMS1N_wh1JfvSS
 from django.shortcuts import render
 import sys, requests, json, urllib.request, time
 
@@ -120,6 +118,34 @@ class DebateVoteViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=400)
 
+    def update(self, request, *args, **kwargs):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        sys.stderr.write(str(data['CONTACT_ID']) + " " + str(data['DEBATE_ID']))
+        serializer = DebateVoteSerializer(data=data)
+        if serializer.is_valid():
+            resultset = Debate_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['DEBATE_ID'])
+            if resultset is None:
+                return Response("You can't change other users' likes", status=400)
+            else:
+                likee = serializer.validated_data['LIKE']
+                Debate_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['DEBATE_ID']).update(LIKE=likee)
+                if resultset.LIKE == likee:
+                    return Response(serializer.data, status=200)
+                elif likee == 1:
+                    Debate.objects.filter(ID=serializer.data['DEBATE_ID']).update(SCORE=F('SCORE') + 1)
+                    sys.stderr.write("SCORE ADDED  " + str(serializer.data['DEBATE_ID']))
+                    return Response(serializer.data, status=200)
+                elif likee == 0:
+                    Debate.objects.filter(ID=serializer.data['DEBATE_ID']).update(SCORE=F('SCORE') - 1)
+                    return Response(serializer.data, status=200)
+                else:
+                    return Response("Something's amiss", status=400)
+        else:
+            return Response(serializer.errors, status=400)
+
 class ArgumentVoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Argument_vote.objects.all().order_by('ID')
@@ -136,6 +162,34 @@ class ArgumentVoteViewSet(viewsets.ModelViewSet):
             argu = Argument.objects.filter(pk=data['ARGUMENT_ID']).values('DEBATE_ID').last()
             Debate.objects.filter(ID=argu['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
             return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def update(self, request, *args, **kwargs):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        sys.stderr.write(str(data['CONTACT_ID']) + " " + str(data['ARGUMENT_ID']))
+        serializer = ArgumentVoteSerializer(data=data)
+        if serializer.is_valid():
+            resultset = Argument_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['ARGUMENT_ID'])
+            if resultset is None:
+                return Response("You can't change other users' likes", status=400)
+            else:
+                likee = serializer.validated_data['LIKE']
+                Argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['ARGUMENT_ID']).update(LIKE=likee)
+                if resultset.LIKE == likee:
+                    return Response(serializer.data, status=200)
+                elif likee == 1:
+                    Argument.objects.filter(ID=serializer.data['ARGUMENT_ID']).update(SCORE=F('SCORE') + 1)
+                    sys.stderr.write("SCORE ADDED  " + str(serializer.data['ARGUMENT_ID']))
+                    return Response(serializer.data, status=200)
+                elif likee == 0:
+                    Argument.objects.filter(ID=serializer.data['ARGUMENT_ID']).update(SCORE=F('SCORE') - 1)
+                    return Response(serializer.data, status=200)
+                else:
+                    return Response("Something's amiss", status=400)
         else:
             return Response(serializer.errors, status=400)
 
@@ -156,6 +210,34 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
             argu = Argument.objects.filter(pk=cargu['ARGUMENT_ID']).values('DEBATE_ID').last()
             Debate.objects.filter(ID=argu['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
             return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def update(self, request, *args, **kwargs):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        sys.stderr.write(str(data['CONTACT_ID']) + " " + str(data['COUNTER_ARGUMENT_ID']))
+        serializer = CounterArgumentVoteSerializer(data=data)
+        if serializer.is_valid():
+            resultset = Counter_argument_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID'])
+            if resultset is None:
+                return Response("You can't change other users' likes", status=400)
+            else:
+                likee = serializer.validated_data['LIKE']
+                Argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID']).update(LIKE=likee)
+                if resultset.LIKE == likee:
+                    return Response(serializer.data, status=200)
+                elif likee == 1:
+                    Counter_argument.objects.filter(ID=serializer.data['COUNTER_ARGUMENT_ID']).update(SCORE=F('SCORE') + 1)
+                    sys.stderr.write("SCORE ADDED  " + str(serializer.data['COUNTER_ARGUMENT_ID']))
+                    return Response(serializer.data, status=200)
+                elif likee == 0:
+                    Counter_argument.objects.filter(ID=serializer.data['COUNTER_ARGUMENT_ID']).update(SCORE=F('SCORE') - 1)
+                    return Response(serializer.data, status=200)
+                else:
+                    return Response("Something's amiss", status=400)
         else:
             return Response(serializer.errors, status=400)
 
