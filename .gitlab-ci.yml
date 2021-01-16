@@ -23,6 +23,8 @@ test:
     #- apt-get install -y python-dev python-pip
     - pip install -r requirements.txt
     - python manage.py test api.tests --settings=DEEMO.settings.test
+  only:
+    - master
 
 Deployment:
   image: ruby:2.4
@@ -36,3 +38,5 @@ Deployment:
   environment:
     name: production
     url: $HEROKU_APP_HOST
+  only:
+    - master
