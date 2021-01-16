@@ -218,7 +218,9 @@ class Debate_vote(models.Model):
     CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together = (("DEBATE_ID", "CONTACT_ID"),)
+        constraints = [
+            models.UniqueConstraint(fields=['DEBATE_ID','CONTACT_ID'], name='Unique Debate Vote')
+        ]
 
 class Argument_vote(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -227,7 +229,9 @@ class Argument_vote(models.Model):
     CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together = (("ARGUMENT_ID", "CONTACT_ID"),)
+        constraints = [
+            models.UniqueConstraint(fields=['ARGUMENT_ID','CONTACT_ID'], name='Unique Argument Vote')
+        ]
 
 class Counter_argument_vote(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -236,7 +240,9 @@ class Counter_argument_vote(models.Model):
     CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together = (("COUNTER_ARGUMENT_ID", "CONTACT_ID"),)
+        constraints = [
+            models.UniqueConstraint(fields=['COUNTER_ARGUMENT_ID','CONTACT_ID'], name='Unique Counter Argument Vote')
+        ]
 
 class ChatComment(models.Model):
     ID = models.AutoField(primary_key=True)
