@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Category, User, ChatComment
+Counter_argument_vote, Category, User, ChatComment, RecentChatComments
 
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,3 +54,14 @@ class ChatCommentSerializer(serializers.ModelSerializer):
         model = ChatComment
         fields = '__all__'
         list_serializer_class = ChatCommentListSerializer
+
+class RecentChatCommentsListSerializer(serializers.ListSerializer):
+    def create(self, validated_data):
+        RecentChatComments = [RecentChatComments(**item) for item in validated_data]
+        return ChatComment.objects.bulk_create(RecentChatComments)
+
+class RecentChatCommentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecentChatComments
+        fields = '__all__'
+        list_serializer_class = RecentChatCommentsListSerializer

@@ -16,9 +16,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer,\
-CategorySerializer, UserSerializer, ChatCommentSerializer
+CategorySerializer, UserSerializer, ChatCommentSerializer, RecentChatCommentsSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Category, User, ChatComment
+Counter_argument_vote, Category, User, ChatComment, RecentChatComments
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -34,8 +34,6 @@ from django.template import loader
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from datetime import datetime
-
-ChatCommentsList = []
 
 class DebateViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -241,44 +239,29 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=400)
 
-class ChatCommentViewSet(viewsets.ViewSet):
+class ChatCommentViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = RecentChatCommentsSerializer
     def list(self, request):
         debateid = request.query_params.get('id', None)
-        alli = request.query_params.get('all', None)
         if debateid is None:
-            return Response("Please put a debate id in your query")
-        if debateid is not None and str(alli) == "True":
+            return Response("Please put a debate id in your query", status=400)
+        else:
             queryset = ChatComment.objects.filter(DEBATE_ID=debateid).order_by('ID')
             serializer = ChatCommentSerializer(queryset, many=True)
             return Response(serializer.data)
-        elif debateid is not None and alli != True:
-            AllSerializer = ChatCommentSerializer(data=ChatCommentsList, many=True)
-            if AllSerializer.is_valid():
-                return Response(AllSerializer.data)
-            else:
-                return Response("Invalid data")
 
-    def create(self, request):
-        key=request.auth
-        user=Token.objects.get(key=key).user_id
-        data = JSONParser().parse(request)
-        data['CONTACT_ID'] = user
-        data['DATE'] = datetime.now()
-        serializer = ChatCommentSerializer(data=data)
-        if serializer.is_valid():
-            global ChatCommentsList
-            ChatCommentsList += [data]
-            #sys.stderr.write(str(len(ChatCommentsList)))
-            if len(ChatCommentsList) >= 50:
-                AllSerializer = ChatCommentSerializer(data=ChatCommentsList, many=True)
-                if AllSerializer.is_valid():
-                    AllSerializer.save()
-                    ChatCommentsList = []
-                    return Response({"Response":"Collection added"},status=201)
-            return Response(serializer.data,status=200)
+class RecentChatCommentsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = RecentChatCommentsSerializer
+    def list(self, request):
+        debateid = request.query_params.get('id', None)
+        if debateid is None:
+            return Response("Please put a debate id in your query", status=400)
         else:
-            return Response(serializer.errors, status=400)
+            queryset = RecentChatComments.objects.filter(DEBATE_ID=debateid).order_by('ID')
+            serializer = RecentChatCommentsSerializer(queryset, many=True)
+            return Response(serializer.data)
 
 class SearchDebatesAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]

@@ -1,0 +1,16 @@
+CREATE OR REPLACE FUNCTION InsertOnChatComments()
+  RETURNS trigger AS
+$InsertOnChatComments$
+BEGIN
+	INSERT INTO api_chatcomment("CONTACT_ID_id", "CONTACT_NAME", "DATE", "TEXT", "DEBATE_ID_id") VALUES(NEW."CONTACT_ID_id", NEW."CONTACT_NAME", NEW."DATE", NEW."TEXT", NEW."DEBATE_ID_id");
+	RETURN NULL;
+END
+$InsertOnChatComments$
+LANGUAGE 'plpgsql';
+
+
+CREATE TRIGGER onInsert
+    AFTER INSERT OR UPDATE 
+    ON public.api_chatcomment
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.InsertOnChatComments();

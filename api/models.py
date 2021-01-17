@@ -251,3 +251,11 @@ class ChatComment(models.Model):
     DATE = models.DateTimeField()
     TEXT = models.CharField(max_length=600, blank=True, null=True)
     DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
+
+class RecentChatComments(models.Model):
+    ID = models.AutoField(primary_key=True)
+    CONTACT_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
+    CONTACT_NAME = models.CharField(max_length=50, blank=True, null=True)
+    DATE = models.DateTimeField(auto_now_add=True)
+    TEXT = models.CharField(max_length=600, blank=True, null=True)
+    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
