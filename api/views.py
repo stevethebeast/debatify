@@ -1,5 +1,5 @@
 from django.shortcuts import render
-import sys, requests, json, urllib.request, time
+import sys, requests, json, urllib.request, time, random, string
 
 # Create your views here.
 from rest_framework import viewsets, views, status, filters, generics
@@ -126,21 +126,10 @@ class DebateVoteViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             resultset = Debate_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], DEBATE_ID=serializer.validated_data['DEBATE_ID'])
             if resultset is None:
-                return Response("You can't change other users' likes", status=400)
+                return Response("You can't change other users' sides", status=400)
             else:
-                likee = serializer.validated_data['LIKE']
-                Debate_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], DEBATE_ID=serializer.validated_data['DEBATE_ID']).update(LIKE=likee)
-                if resultset.LIKE == likee:
-                    return Response(serializer.data, status=200)
-                elif likee == 1:
-                    Debate.objects.filter(ID=serializer.data['DEBATE_ID']).update(SCORE=F('SCORE') + 1)
-                    sys.stderr.write("SCORE ADDED  " + str(serializer.data['DEBATE_ID']))
-                    return Response(serializer.data, status=200)
-                elif likee == 0:
-                    Debate.objects.filter(ID=serializer.data['DEBATE_ID']).update(SCORE=F('SCORE') - 1)
-                    return Response(serializer.data, status=200)
-                else:
-                    return Response("Something's amiss", status=400)
+                SIDEE = serializer.validated_data['SIDE']
+                Debate_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], DEBATE_ID=serializer.validated_data['DEBATE_ID']).update(SIDE=SIDEE)
         else:
             return Response(serializer.errors, status=400)
 
@@ -224,7 +213,7 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
                 return Response("You can't change other users' likes", status=400)
             else:
                 likee = serializer.validated_data['LIKE']
-                Argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], COUNTER_ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID']).update(LIKE=likee)
+                Counter_argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], COUNTER_ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID']).update(LIKE=likee)
                 if resultset.LIKE == likee:
                     return Response(serializer.data, status=200)
                 elif likee == 1:
@@ -410,18 +399,31 @@ def activate(request, uidb64, token):
     else:
         return HttpResponse('Activation link is invalid!')
 
-class CustomAuthToken(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        data = JSONParser().parse(request)
-        user = authenticate(email=data["email"], password=data["password"])
-        if user is not None and user.mail_confirmed is True:
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
-        else:
-            return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)
-
-def contact(request):
-    return render(request, 'contact.html')
+def reset(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        #User.objects.filter(pk=uid).update(is_active=True)
+        newpass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+        user.set_password(newpass)
+        user.save()
+        mail_subject = 'Temporary password'
+        message = render_to_string('acc_temporary_password.html', {
+            'user': user.email,
+            'password': newpass,
+        })
+        #sys.stderr.write("MAIL SUBJECT " + mail_subject)
+        #sys.stderr.write("USER " + createdUser.email)
+        #sys.stderr.write("DOMAIN " + settings.DOMAIN)
+        #sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
+        send_mail(mail_subject, 
+            message, settings.EMAIL_HOST_USER, [user.email], fail_silently = False)
+        return HttpResponse('Check your emails for your new temporary password')
+    else:
+        return HttpResponse('Activation link is invalid!')
 
 @api_view(('POST',))
 def recaptcha_valid(request):
@@ -434,9 +436,10 @@ def recaptcha_valid(request):
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
     result = r.json()
     if result['success']:
-        #response = requests.post(settings.DOMAIN + "/createuser/", data=data)
+        if data["password1"] != data["password2"]:
+            return Response({"error":"Passwords do not match"}, status=400)
         try:
-            response = User.objects.create_user(data["email"], data["password"], first_name=data["first_name"], last_name=data["last_name"])
+            response = User.objects.create_user(data["email"], data["password1"], first_name=data["first_name"], last_name=data["last_name"])
         except IntegrityError as e:
             return Response({"Error": "User already exists"}, status=400)
         if response is not None:
@@ -448,16 +451,15 @@ def recaptcha_valid(request):
                 'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
                 'token':account_activation_token.make_token(createdUser),
             })
-            sys.stderr.write("MAIL SUBJECT " + mail_subject)
-            sys.stderr.write("USER " + createdUser.email)
-            sys.stderr.write("DOMAIN " + settings.DOMAIN)
-            sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
+        #sys.stderr.write("MAIL SUBJECT " + mail_subject)
+        #sys.stderr.write("USER " + createdUser.email)
+        #sys.stderr.write("DOMAIN " + settings.DOMAIN)
+        #sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
             send_mail(mail_subject, 
                 message, settings.EMAIL_HOST_USER, [createdUser.email], fail_silently = False)
             return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
         else:
             return Response("Error sending mail")
-        #return Response(response)
     else:
         return Response({"Recaptcha status":"Error"}, status=400)
 
@@ -478,15 +480,52 @@ def UserHistory(request):
     res = {"Argument_votes": argvotes, "Counter_Argument_Votes": cargvotes, "Debate_votes": debvotes, "Debates": debs, "Arguments": args, "Counter_arguments": cargs}
     return Response(res)
 
-@api_view(('GET',))
-def send_test_email(request):
-    sys.stderr.write("MAIL SUBJECT BONJOUUUUUUUUUUUR")
-    mail_subject = 'Activate your blog account.'
-    message = "MEEESSAGEEE"
-    sys.stderr.write("MAIL SUBJECT " + mail_subject)
-    #sys.stderr.write("USER " + createdUser.email)
-    #sys.stderr.write("DOMAIN " + settings.DOMAIN)
-    sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
-    send_mail(mail_subject, 
-        message, settings.EMAIL_HOST_USER, ["sverbraeken60@gmail.com"], fail_silently = False)
-    return Response("YEP", status=200)
+@api_view(('POST',))
+def logincpt(request):
+    data = request.data
+    user = authenticate(email=data["email"], password=data["password"])
+    if user is not None and user.mail_confirmed is True:
+        sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'auth_token': token.key})
+    elif user is not None and user.mail_confirmed is False:
+        return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)
+    else:
+        return Response({"Error":"Invalid credentials"}, status=400)
+
+@api_view(('POST',))
+def email_password_reset(request):
+    user = User.objects.get(email=request.data['email'])
+    if user is not None:
+        mail_subject = 'Change your password'
+        message = render_to_string('acc_reset_password.html', {
+            'user': user.email,
+            'domain': settings.DOMAIN,
+            'uid':urlsafe_base64_encode(force_bytes(user.id)),
+            'token':account_activation_token.make_token(user),
+        })
+        #sys.stderr.write("MAIL SUBJECT " + mail_subject)
+        #sys.stderr.write("USER " + createdUser.email)
+        #sys.stderr.write("DOMAIN " + settings.DOMAIN)
+        #sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
+        send_mail(mail_subject, 
+            message, settings.EMAIL_HOST_USER, [user.email], fail_silently = False)
+        return Response({"Password":"Please check your emails to change password"}, status= status.HTTP_200_OK,content_type='application/json')
+    else:
+        return Response({"Error":"User not found"}, status=400)
+
+@api_view(('POST',))
+def change_password(request):
+    permission_classes = [IsAuthenticated]
+    data = request.data
+    user = Token.objects.get(key=request.auth).user_id
+    if user is not None:
+        fulluser = authenticate(email=User.objects.get(pk=user).email, password=data["oldpassword"])
+        if fulluser is not None and data['password1'] == data['password2']:
+            fulluser.set_password(data['password1'])
+            fulluser.save()
+            return Response("New password set", status=200)
+        else:
+            return Response("Something's not matching", status=400)
+    else:
+        return Response({"Error":"User not found"}, status=400)

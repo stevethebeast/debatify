@@ -37,10 +37,13 @@ urlpatterns = [
     url(r'^GetTokenUsername$', views.GetTokenUsername),
     url(r'^GetUserHistory$', views.UserHistory),
     path(r'activate/<uidb64>/<token>/', views.activate, name='activate'),
-    path('api-token-auth/', views.CustomAuthToken.as_view()),
-    path('contact/', views.contact),
+    path(r'reset/<uidb64>/<token>/', views.reset, name='reset'),
+    #path('api-token-auth/', views.CustomAuthToken.as_view()),
+    #path('contact/', views.contact),
     path('createusercpt/', views.recaptcha_valid),
-    path('testemail/', views.send_test_email),
+    path('logincpt/', views.logincpt),
+    path('emailpasswordreset/', views.email_password_reset),
+    path('change_password/', views.change_password),
     #url(r'^api/tutorials/(?P<pk>[0-9]+)$', views.tutorial_detail),
     #url(r'^api/tutorials/published$', views.tutorial_list_published)
 ]
