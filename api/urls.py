@@ -40,6 +40,7 @@ urlpatterns = [
     path('api-token-auth/', views.CustomAuthToken.as_view()),
     path('contact/', views.contact),
     path('createusercpt/', views.recaptcha_valid),
+    path('testemail/', views.send_test_email),
     #url(r'^api/tutorials/(?P<pk>[0-9]+)$', views.tutorial_detail),
     #url(r'^api/tutorials/published$', views.tutorial_list_published)
 ]

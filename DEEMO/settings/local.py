@@ -28,15 +28,13 @@ CORS_ALLOWED_ORIGINS = []
 
 DOMAIN = "http://127.0.0.1:8000"
 
-response = requests.get("https://mailtrap.io/api/v1/inboxes.json?api_token=" + "9b8bb8bfca740b8ff0b91cb642610cb0")
-credentials = response.json()[0]
-#DEFAULT_FROM_EMAIL = credentials['username']
-#SERVER_EMAIL = credentials['username']
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = credentials['domain']
-EMAIL_HOST_USER = credentials['username']
-EMAIL_HOST_PASSWORD = credentials['password']
-EMAIL_PORT = credentials['smtp_ports'][0]
-EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "account.confimation@debatify.co"
+SERVER_EMAIL = "account.confimation@debatify.co"
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = "mail.debatify.co"
+EMAIL_HOST_USER = "account.confimation@debatify.co"
+EMAIL_HOST_PASSWORD = "k-BebiFunX3g"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = False
 
 INSTALLED_APPS += ['django.contrib.admin',]

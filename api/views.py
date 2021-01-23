@@ -124,12 +124,12 @@ class DebateVoteViewSet(viewsets.ModelViewSet):
         sys.stderr.write(str(data['CONTACT_ID']) + " " + str(data['DEBATE_ID']))
         serializer = DebateVoteSerializer(data=data)
         if serializer.is_valid():
-            resultset = Debate_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['DEBATE_ID'])
+            resultset = Debate_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], DEBATE_ID=serializer.validated_data['DEBATE_ID'])
             if resultset is None:
                 return Response("You can't change other users' likes", status=400)
             else:
                 likee = serializer.validated_data['LIKE']
-                Debate_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['DEBATE_ID']).update(LIKE=likee)
+                Debate_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], DEBATE_ID=serializer.validated_data['DEBATE_ID']).update(LIKE=likee)
                 if resultset.LIKE == likee:
                     return Response(serializer.data, status=200)
                 elif likee == 1:
@@ -219,12 +219,12 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
         sys.stderr.write(str(data['CONTACT_ID']) + " " + str(data['COUNTER_ARGUMENT_ID']))
         serializer = CounterArgumentVoteSerializer(data=data)
         if serializer.is_valid():
-            resultset = Counter_argument_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID'])
+            resultset = Counter_argument_vote.objects.get(CONTACT_ID=serializer.validated_data['CONTACT_ID'], COUNTER_ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID'])
             if resultset is None:
                 return Response("You can't change other users' likes", status=400)
             else:
                 likee = serializer.validated_data['LIKE']
-                Argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID']).update(LIKE=likee)
+                Argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], COUNTER_ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID']).update(LIKE=likee)
                 if resultset.LIKE == likee:
                     return Response(serializer.data, status=200)
                 elif likee == 1:
@@ -262,6 +262,18 @@ class RecentChatCommentsViewSet(viewsets.ModelViewSet):
             queryset = RecentChatComments.objects.filter(DEBATE_ID=debateid).order_by('ID')
             serializer = RecentChatCommentsSerializer(queryset, many=True)
             return Response(serializer.data)
+
+    def create(self, request):
+        key=request.auth
+        user=Token.objects.get(key=key).user_id
+        data = JSONParser().parse(request)
+        data['CONTACT_ID'] = user
+        serializer = RecentChatCommentsSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors, status=400)
 
 class SearchDebatesAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -465,3 +477,16 @@ def UserHistory(request):
     cargs = Counter_argument.objects.filter(CONTACT_ID=user).values("ID", "TITLE", "TEXT", "SCORE", "CREATED_AT", "ARGUMENT_ID").order_by('-CREATED_AT')
     res = {"Argument_votes": argvotes, "Counter_Argument_Votes": cargvotes, "Debate_votes": debvotes, "Debates": debs, "Arguments": args, "Counter_arguments": cargs}
     return Response(res)
+
+@api_view(('GET',))
+def send_test_email(request):
+    sys.stderr.write("MAIL SUBJECT BONJOUUUUUUUUUUUR")
+    mail_subject = 'Activate your blog account.'
+    message = "MEEESSAGEEE"
+    sys.stderr.write("MAIL SUBJECT " + mail_subject)
+    #sys.stderr.write("USER " + createdUser.email)
+    #sys.stderr.write("DOMAIN " + settings.DOMAIN)
+    sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
+    send_mail(mail_subject, 
+        message, settings.EMAIL_HOST_USER, ["sverbraeken60@gmail.com"], fail_silently = False)
+    return Response("YEP", status=200)
