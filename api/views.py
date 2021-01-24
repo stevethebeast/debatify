@@ -130,6 +130,7 @@ class DebateVoteViewSet(viewsets.ModelViewSet):
             else:
                 SIDEE = serializer.validated_data['SIDE']
                 Debate_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], DEBATE_ID=serializer.validated_data['DEBATE_ID']).update(SIDE=SIDEE)
+                return Response(serializer.data, status=200)
         else:
             return Response(serializer.errors, status=400)
 
