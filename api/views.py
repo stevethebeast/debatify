@@ -16,9 +16,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer,\
-CategorySerializer, UserSerializer, ChatCommentSerializer, RecentChatCommentsSerializer
+UserSerializer, ChatCommentSerializer, RecentChatCommentsSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Category, User, ChatComment, RecentChatComments
+Counter_argument_vote, User, ChatComment, RecentChatComments
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -27,6 +27,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
 from django.conf import settings
@@ -56,10 +57,6 @@ class DebateTop20ActivityViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Debate.objects.all().order_by('-ACTIVITY_SCORE')[:20]
     serializer_class = DebateSerializer
-
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Category.objects.all().order_by('ID')
-    serializer_class = CategorySerializer
 
 class ArgumentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -313,7 +310,7 @@ def ListDebatesWithUserChoices(request):
         user = Token.objects.get(key=key).user_id
         return Response(Debate.objects.with_debatevotes(user))
     else:
-        content = list(Debate.objects.annotate(FIRST_NAME=F('CREATOR_ID__first_name'),LAST_NAME=F('CREATOR_ID__last_name'),CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','NAME','YES_TITLE','NO_TITLE','CONTEXT','PHOTO_PATH','IS_PUBLIC','FIRST_NAME','LAST_NAME','CREATOR_ID','CATEGORY_ID','CREATED_AT_STR','LATITUDE','LONGITUDE').order_by('ID'))
+        content = list(Debate.objects.annotate(CREATOR_NAME=F('CREATOR_ID__first_name'), CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','NAME','YES_TITLE','NO_TITLE','CONTEXT','PHOTO_PATH','IS_PUBLIC','CREATOR_NAME','CREATOR_ID', 'CREATED_AT_STR','LATITUDE','LONGITUDE').order_by('ID'))
         return Response(content)
 
 @api_view(['GET'])
@@ -429,40 +426,41 @@ def reset(request, uidb64, token):
 @api_view(('POST',))
 def recaptcha_valid(request):
     data = request.data
-    recaptcha_response = data['g-recaptcha-response']
-    payload = {
-        'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
-        'response': recaptcha_response
-    }
-    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
-    result = r.json()
-    if result['success']:
-        if data["password1"] != data["password2"]:
-            return Response({"error":"Passwords do not match"}, status=400)
-        try:
-            response = User.objects.create_user(data["email"], data["password1"], first_name=data["first_name"], last_name=data["last_name"])
-        except IntegrityError as e:
-            return Response({"Error": "User already exists"}, status=400)
-        if response is not None:
-            createdUser = User.objects.get(email=response.email)
-            mail_subject = 'Activate your blog account.'
-            message = render_to_string('acc_active_email.html', {
-                'user': createdUser.email,
-                'domain': settings.DOMAIN,
-                'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
-                'token':account_activation_token.make_token(createdUser),
-            })
+    #recaptcha_response = data['g-recaptcha-response']
+    #payload = {
+     #   'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+     #   'response': recaptcha_response
+    #}
+    #r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
+    #result = r.json()
+    #if result['success']:
+    if data["password1"] != data["password2"]:
+        return Response({"error":"Passwords do not match"}, status=400)
+    try:
+        response = User.objects.create_user(data["email"], data["password1"], first_name=data["first_name"], last_name=data["last_name"])
+    except IntegrityError as e:
+        return Response({"Error": "User already exists"}, status=400)
+    if response is not None:
+        createdUser = User.objects.get(email=response.email)
+        mail_subject = 'Activate your blog account.'
+        message = render_to_string('acc_active_email.html', {
+            'user': createdUser.email,
+            'domain': settings.DOMAIN,
+            'uid':urlsafe_base64_encode(force_bytes(createdUser.id)),
+            'token':account_activation_token.make_token(createdUser),
+        })
+        plain_message = strip_tags(message)
         #sys.stderr.write("MAIL SUBJECT " + mail_subject)
         #sys.stderr.write("USER " + createdUser.email)
         #sys.stderr.write("DOMAIN " + settings.DOMAIN)
         #sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
-            send_mail(mail_subject, 
-                message, settings.EMAIL_HOST_USER, [createdUser.email], fail_silently = False)
-            return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
-        else:
-            return Response("Error sending mail")
+        send_mail(mail_subject, 
+            plain_message, settings.EMAIL_HOST_USER, [createdUser.email], html_message=message, fail_silently = False)
+        return Response({"Register":"Please confirm your email address to complete the registration"}, status= status.HTTP_200_OK,content_type='application/json')
     else:
-        return Response({"Recaptcha status":"Error"}, status=400)
+        return Response("Error sending mail")
+    #else:
+    #    return Response({"Recaptcha status":"Error"}, status=400)
 
 @api_view(('GET',))
 def UserHistory(request):

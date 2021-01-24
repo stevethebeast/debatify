@@ -44,11 +44,12 @@ class User(AbstractUser):
 class DebateManager(models.Manager):
     def with_debatevotes(self, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\", adv.\"ID\", ad.\"IS_PUBLIC\", ad.\"CATEGORY_ID_id\", adv.\"first_name\", adv.\"last_name\", ad.\"LATITUDE\", ad.\"LONGITUDE\"\
+            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\", adv.\"ID\", ad.\"IS_PUBLIC\", adv.\"first_name\", adv.\"last_name\", ad.\"LATITUDE\", ad.\"LONGITUDE\", au.\"first_name\"\
                 FROM api_debate AS ad LEFT OUTER JOIN \
                 (SELECT advv.\"ID\", advv.\"DEBATE_ID_id\" DEBATE_ID, advv.\"CONTACT_ID_id\" CONTACT_ID, advv.\"SIDE\", au.\"first_name\", au.\"last_name\"\
                 FROM api_debate_vote advv INNER JOIN api_user au ON advv.\"CONTACT_ID_id\" = au.\"id\"\
-                WHERE advv.\"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID \
+                WHERE advv.\"CONTACT_ID_id\"=%s) adv ON ad.\"ID\"=adv.DEBATE_ID LEFT OUTER JOIN\
+                api_user au ON ad.\"CREATOR_ID_id\" = au.\"id\" \
                 WHERE ad.\"IS_PUBLIC\"=1;", [user])
             objects_list = []
             for row in cursor.fetchall():
@@ -66,18 +67,13 @@ class DebateManager(models.Manager):
                 d["SIDE"] = row[9]
                 d["VOTE_ID"] = row[10]
                 d["IS_PUBLIC"] = row[11]
-                d["CATEGORY_ID"] = row[12]
-                d["FIRST_NAME"] = row[13]
-                d["LAST_NAME"] = row[14]
-                d["LATITUDE"] = row[15]
-                d["LONGITUDE"] = row[16]
+                d["FIRST_NAME"] = row[12]
+                d["LAST_NAME"] = row[13]
+                d["LATITUDE"] = row[14]
+                d["LONGITUDE"] = row[15]
+                d["CREATOR_NAME"] = row[16]
                 objects_list.append(d)
         return objects_list
-
-class Category(models.Model):
-    ID = models.AutoField(primary_key=True)
-    NAME = models.CharField(max_length=60)
-    COLOR = models.CharField(max_length=60)
 
 class Debate(models.Model):
     ID = models.AutoField(primary_key=True)
@@ -88,7 +84,6 @@ class Debate(models.Model):
     PHOTO_PATH = models.CharField(max_length=150, blank=True, null=True)
     IS_PUBLIC = models.IntegerField(default=1, null=False)
     CREATOR_ID = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=False)
-    CATEGORY_ID = models.ForeignKey(Category, default=1, null=False, on_delete=models.CASCADE)
     CREATED_AT = models.DateTimeField(auto_now_add=True)
     ACTIVITY_SCORE = models.IntegerField(default=0)
     LATITUDE = models.FloatField(null=True)

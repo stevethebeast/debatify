@@ -1,23 +1,18 @@
 from rest_framework import serializers
 
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, Category, User, ChatComment, RecentChatComments
+Counter_argument_vote, User, ChatComment, RecentChatComments
 
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Debate
         fields = '__all__'
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = '__all__'
-
 class ArgumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Argument
         fields = '__all__'
-        read_only_fields = ('SCORE')
+        read_only_fields = ['SCORE']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +23,7 @@ class CounterArgumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Counter_argument
         fields = '__all__'
+        read_only_fields = ['SCORE']
 
 class DebateVoteSerializer(serializers.ModelSerializer):
     class Meta:
