@@ -44,7 +44,7 @@ class User(AbstractUser):
 class DebateManager(models.Manager):
     def with_debatevotes(self, user):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\", adv.\"ID\", ad.\"IS_PUBLIC\", adv.\"first_name\", adv.\"last_name\", ad.\"LATITUDE\", ad.\"LONGITUDE\", au.\"first_name\"\
+            cursor.execute("SELECT ad.\"ID\" DEBATE_ID, ad.\"NAME\", ad.\"YES_TITLE\", ad.\"NO_TITLE\", ad.\"CONTEXT\", ad.\"PHOTO_PATH\", ad.\"CREATOR_ID_id\" CREATOR_ID, CAST(ad.\"CREATED_AT\" AS VARCHAR) CREATED_AT, adv.CONTACT_ID, adv.\"SIDE\", adv.\"ID\", ad.\"IS_PUBLIC\", adv.\"first_name\", adv.\"last_name\", ad.\"LATITUDE\", ad.\"LONGITUDE\", au.\"first_name\", ad.\"CATEGORY_ID\"\
                 FROM api_debate AS ad LEFT OUTER JOIN \
                 (SELECT advv.\"ID\", advv.\"DEBATE_ID_id\" DEBATE_ID, advv.\"CONTACT_ID_id\" CONTACT_ID, advv.\"SIDE\", au.\"first_name\", au.\"last_name\"\
                 FROM api_debate_vote advv INNER JOIN api_user au ON advv.\"CONTACT_ID_id\" = au.\"id\"\
@@ -72,6 +72,7 @@ class DebateManager(models.Manager):
                 d["LATITUDE"] = row[14]
                 d["LONGITUDE"] = row[15]
                 d["CREATOR_NAME"] = row[16]
+                d["CATEGORY_ID"] = row[17]
                 objects_list.append(d)
         return objects_list
 

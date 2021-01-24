@@ -310,7 +310,7 @@ def ListDebatesWithUserChoices(request):
         user = Token.objects.get(key=key).user_id
         return Response(Debate.objects.with_debatevotes(user))
     else:
-        content = list(Debate.objects.annotate(CREATOR_NAME=F('CREATOR_ID__first_name'), CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','NAME','YES_TITLE','NO_TITLE','CONTEXT','PHOTO_PATH','IS_PUBLIC','CREATOR_NAME','CREATOR_ID', 'CREATED_AT_STR','LATITUDE','LONGITUDE').order_by('ID'))
+        content = list(Debate.objects.annotate(CREATOR_NAME=F('CREATOR_ID__first_name'), CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','NAME','YES_TITLE','NO_TITLE','CONTEXT','PHOTO_PATH','IS_PUBLIC','CREATOR_NAME','CREATOR_ID','CATEGORY_ID','CREATED_AT_STR','LATITUDE','LONGITUDE').order_by('ID'))
         return Response(content)
 
 @api_view(['GET'])
