@@ -146,6 +146,7 @@ class ArgumentVoteViewSet(viewsets.ModelViewSet):
             serializer.save()
             argu = Argument.objects.filter(pk=data['ARGUMENT_ID']).values('DEBATE_ID').last()
             Debate.objects.filter(ID=argu['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
+            Argument.objects.filter(ID=serializer.data['ARGUMENT_ID']).update(SCORE=F('SCORE') + 1)
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -163,8 +164,11 @@ class ArgumentVoteViewSet(viewsets.ModelViewSet):
                 return Response("You can't change other users' likes", status=400)
             else:
                 likee = serializer.validated_data['LIKE']
+                if likee < 0 or likee > 1:
+                    return Response("You sneaky motherfucker", status=400)
                 Argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], ARGUMENT_ID=serializer.validated_data['ARGUMENT_ID']).update(LIKE=likee)
                 if resultset.LIKE == likee:
+                    sys.stderr.write("NOTHING HAPPENS " + str(resultset.LIKE) + " " + str(likee))
                     return Response(serializer.data, status=200)
                 elif likee == 1:
                     Argument.objects.filter(ID=serializer.data['ARGUMENT_ID']).update(SCORE=F('SCORE') + 1)
@@ -194,6 +198,7 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
             cargu = Counter_argument.objects.filter(pk=data['COUNTER_ARGUMENT_ID']).values('ARGUMENT_ID').last()
             argu = Argument.objects.filter(pk=cargu['ARGUMENT_ID']).values('DEBATE_ID').last()
             Debate.objects.filter(ID=argu['DEBATE_ID']).update(ACTIVITY_SCORE=F('ACTIVITY_SCORE') + 1)
+            Counter_argument.objects.filter(ID=serializer.data['COUNTER_ARGUMENT_ID']).update(SCORE=F('SCORE') + 1)
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -211,6 +216,8 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
                 return Response("You can't change other users' likes", status=400)
             else:
                 likee = serializer.validated_data['LIKE']
+                if likee < 0 or likee > 1:
+                    return Response("You sneaky motherfucker", status=400)
                 Counter_argument_vote.objects.filter(CONTACT_ID=serializer.validated_data['CONTACT_ID'], COUNTER_ARGUMENT_ID=serializer.validated_data['COUNTER_ARGUMENT_ID']).update(LIKE=likee)
                 if resultset.LIKE == likee:
                     return Response(serializer.data, status=200)
