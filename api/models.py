@@ -88,6 +88,7 @@ class Debate(models.Model):
     ACTIVITY_SCORE = models.IntegerField(default=0)
     LATITUDE = models.FloatField(null=True)
     LONGITUDE = models.FloatField(null=True)
+    CATEGORY_ID = models.IntegerField(default=1)
     objects = DebateManager()
 
 class ArgumentManager(models.Manager):
