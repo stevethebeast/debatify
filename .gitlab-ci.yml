@@ -13,6 +13,7 @@ variables:
 stages:
   - test
   - deploy
+  - production
 
 test:
   stage: test
@@ -34,11 +35,27 @@ Deployment:
     - gem install dpl
     - wget -qO- https://cli-assets.heroku.com/install-ubuntu.sh | sh
   script:
+    - dpl --provider=heroku --app=$HEROKU_APP_PREPROD --api-key=$HEROKU_API_KEY
+    #- export HEROKU_API_KEY=$HEROKU_API_KEY
+  environment:
+    name: production
+    url: $HEROKU_APP_HOST_PREPROD
+  only:
+    refs:
+      - master-preprod
+
+Deployment:
+  image: ruby:2.4
+  stage: production
+  before_script:
+    - gem install dpl
+    - wget -qO- https://cli-assets.heroku.com/install-ubuntu.sh | sh
+  script:
     - dpl --provider=heroku --app=$HEROKU_APP_PRODUCTION --api-key=$HEROKU_API_KEY
     #- export HEROKU_API_KEY=$HEROKU_API_KEY
   environment:
     name: production
-    url: $HEROKU_APP_HOST
+    url: $HEROKU_APP_HOST_PRODUCTION
   only:
     refs:
       - master
