@@ -31,7 +31,7 @@ class APItests(APITestCase):
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         response = client.post('/api/auth/users/', {"email": "leidivelazquez@colombiamail.co", "password":"19071969fecha", "first_name":"Leidi", "last_name":"Velazquez"}, format = 'json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_listdebatewithuserchoices_withouttoken(self):
         client = APIClient()
