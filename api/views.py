@@ -55,8 +55,10 @@ class DebateViewSet(viewsets.ModelViewSet):
 
 class DebateTop20ActivityViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
-    queryset = Debate.objects.all().order_by('-ACTIVITY_SCORE')[:20]
     serializer_class = DebateSerializer
+    def list(self, request):
+        query = Debate.objects.annotate(CREATOR_NAME=F('CREATOR_ID__first_name')).values('ID','NAME','YES_TITLE','NO_TITLE','CONTEXT','PHOTO_PATH','IS_PUBLIC','CREATOR_ID','CREATED_AT','ACTIVITY_SCORE','LATITUDE','LONGITUDE','CATEGORY_ID','CREATOR_NAME').order_by('-ACTIVITY_SCORE')[:20]
+        return Response(list(query))
 
 class ArgumentViewSet(viewsets.ModelViewSet):
     permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
@@ -276,40 +278,8 @@ class SearchDebatesAPIView(generics.ListCreateAPIView):
     queryset = Debate.objects.filter(IS_PUBLIC=1).all()
     serializer_class = DebateSerializer
 
-@api_view(['GET','POST'])
-@permission_classes([SafelistPermission&IsAuthenticatedOrReadOnly])
-def GetOrCreateDebateVote(request):
-    key=request.auth
-    user = None
-    debatevote = None
-    if key is not None:
-        user = Token.objects.get(key=key).user_id
-    #sys.stderr.write("yolo " +str(user))
-    if request.method == 'GET':
-        debateid = request.query_params.get('id', None)
-        if debateid is None:
-            content = {"Bad request": "Please put an id as argument"}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-        if user is not None:
-            debatevote = Debate_vote.objects.filter(DEBATE_ID=debateid, CONTACT_ID=user).all()
-        else:
-            debatevote = Debate_vote.objects.all().order_by('DEBATE_ID')
-        if debatevote is not None:
-            serializer = DebateVoteSerializer(debatevote, many=True)
-            return Response(serializer.data)
-        else:
-            return Response({"Response":"Nothing to see here"})
-    else:
-        data = JSONParser().parse(request)
-        serializer = DebateVoteSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=201)
-        else:
-            return Response(serializer.errors, status=400)
-
 @api_view(['GET'])
-#@permission_classes([IsAuthenticatedOrReadOnly])
+@permission_classes([SafelistPermission])
 def ListDebatesWithUserChoices(request):
     key=request.auth
     user = None
@@ -321,7 +291,7 @@ def ListDebatesWithUserChoices(request):
         return Response(content)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([SafelistPermission])
 def ListCounterArgumentsWithUserChoices(request):
     key=request.auth
     user = None
@@ -337,7 +307,7 @@ def ListCounterArgumentsWithUserChoices(request):
         return Response(content)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([SafelistPermission])
 def ListArgumentsWithUserChoices(request):
     key=request.auth
     user = None
@@ -351,23 +321,6 @@ def ListArgumentsWithUserChoices(request):
     else:
         content = list(Argument.objects.filter(DEBATE_ID=debateid).annotate(FIRST_NAME=F('CONTACT_ID__first_name'),LAST_NAME=F('CONTACT_ID__last_name'),CREATED_AT_STR=Cast('CREATED_AT', output_field=models.CharField())).values('ID','TITLE','TEXT','DEBATE_ID','SCORE','CONTACT_ID','SIDE','FIRST_NAME','LAST_NAME','CREATED_AT_STR').order_by('ID'))
         return Response(content)
-
-@api_view(['GET'])
-#@permission_classes([IsAuthenticated])
-def GetAllCounterArgumentsWithLikesByArgumentID(request):
-    key=request.auth
-    user = None
-    counterargumentid = request.query_params.get('id', None)
-    if counterargumentid is None:
-        content = {"Bad request": "Please put an id as argument"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-    if key is not None:
-        user = Token.objects.get(key=key).user_id
-        return Response(Counter_argument.objects.with_counterargumentlikes(counterargumentid, user))
-    else:
-        content = Counter_argument.objects.all().order_by('ID')
-        serializer = CounterArgumentSerializer(content, many=True)
-        return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([SafelistPermission&IsAuthenticated])
