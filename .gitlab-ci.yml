@@ -28,7 +28,7 @@ test:
     refs:
       - master-preprod
 
-Deployment:
+deploy:
   image: ruby:2.4
   stage: deploy
   before_script:
@@ -44,7 +44,7 @@ Deployment:
     refs:
       - master-preprod
 
-Deployment:
+production:
   image: ruby:2.4
   stage: production
   before_script:
