@@ -37,4 +37,8 @@ EMAIL_HOST_PASSWORD = "k-BebiFunX3g"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = False
 
+REST_SAFE_LIST_IPS = ['ALLOW_ALL']
+
+LOGIN_PROVIDED = True
+
 INSTALLED_APPS += ['django.contrib.admin',]

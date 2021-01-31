@@ -39,6 +39,10 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env('EMAIL_PORT')
 EMAIL_USE_TLS = env("EMAIL_USE_TLS")
 
+REST_SAFE_LIST_IPS = env.list('REST_SAFE_LIST_IPS')
+
+LOGIN_PROVIDED = env('LOGIN_PROVIDED')
+
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
 DATABASES = {
     # read os.environ['DATABASE_URL'] and raises ImproperlyConfigured exception if not found

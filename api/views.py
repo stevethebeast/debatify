@@ -5,7 +5,7 @@ import sys, requests, json, urllib.request, time, random, string
 from rest_framework import viewsets, views, status, filters, generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly 
 from django.shortcuts import render
 from django.db.models import F, Count
 from django.db.models.functions import Cast
@@ -28,7 +28,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from .tokens import account_activation_token
+from .tokens import account_activation_token, SafelistPermission
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template import loader
@@ -37,7 +37,7 @@ from rest_framework.authtoken.models import Token
 from datetime import datetime
 
 class DebateViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Debate.objects.all().order_by('ID')
     serializer_class = DebateSerializer
 
@@ -54,12 +54,12 @@ class DebateViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class DebateTop20ActivityViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Debate.objects.all().order_by('-ACTIVITY_SCORE')[:20]
     serializer_class = DebateSerializer
 
 class ArgumentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Argument.objects.all().order_by('ID')
     serializer_class = ArgumentSerializer
 
@@ -77,7 +77,7 @@ class ArgumentViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class CounterArgumentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Counter_argument.objects.all().order_by('ID')
     serializer_class = CounterArgumentSerializer
 
@@ -96,7 +96,7 @@ class CounterArgumentViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class DebateVoteViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Debate_vote.objects.all().order_by('ID')
     serializer_class = DebateVoteSerializer
 
@@ -132,7 +132,7 @@ class DebateVoteViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class ArgumentVoteViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Argument_vote.objects.all().order_by('ID')
     serializer_class = ArgumentVoteSerializer
 
@@ -183,7 +183,7 @@ class ArgumentVoteViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Counter_argument_vote.objects.all().order_by('ID')
     serializer_class = CounterArgumentVoteSerializer
 
@@ -234,7 +234,7 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class ChatCommentViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     serializer_class = RecentChatCommentsSerializer
     def list(self, request):
         debateid = request.query_params.get('id', None)
@@ -246,7 +246,7 @@ class ChatCommentViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(serializer.data)
 
 class RecentChatCommentsViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     serializer_class = RecentChatCommentsSerializer
     def list(self, request):
         debateid = request.query_params.get('id', None)
@@ -270,14 +270,14 @@ class RecentChatCommentsViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class SearchDebatesAPIView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     search_fields = ['NAME', 'YES_TITLE', 'NO_TITLE']
     filter_backends = (filters.SearchFilter,)
     queryset = Debate.objects.filter(IS_PUBLIC=1).all()
     serializer_class = DebateSerializer
 
 @api_view(['GET','POST'])
-@permission_classes([IsAuthenticatedOrReadOnly])
+@permission_classes([SafelistPermission&IsAuthenticatedOrReadOnly])
 def GetOrCreateDebateVote(request):
     key=request.auth
     user = None
@@ -370,7 +370,7 @@ def GetAllCounterArgumentsWithLikesByArgumentID(request):
         return Response(serializer.data)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([SafelistPermission&IsAuthenticated])
 def GetTokenUsername(request):
     key = request.auth
     if key is not None:
@@ -471,7 +471,7 @@ def recaptcha_valid(request):
 
 @api_view(('GET',))
 def UserHistory(request):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SafelistPermission]
     key = request.auth
     user = Token.objects.get(key=key).user_id
     #Argument_vote.objects.filter(CONTACT_ID=user).annotate(ARGUMENT_VOTE_ID="ID", ARGUMENT_VOTE_LIKE="LIKE", ARGUMENT_VOTE_ARGUMENTID="ARGUMENT_ID", ARGUMENTVOTECREATE="CREATED_AT").values("ID", "LIKE", "ARGUMENT_ID", "CREATED_AT").order_by('-CREATED_AT')
@@ -488,6 +488,7 @@ def UserHistory(request):
 
 @api_view(('POST',))
 def logincpt(request):
+    permission_classes = [SafelistPermission]
     data = request.data
     user = authenticate(email=data["email"], password=data["password"])
     if user is not None and user.mail_confirmed is True:
@@ -523,7 +524,7 @@ def email_password_reset(request):
 
 @api_view(('POST',))
 def change_password(request):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SafelistPermission&IsAuthenticated]
     data = request.data
     user = Token.objects.get(key=request.auth).user_id
     if user is not None:
