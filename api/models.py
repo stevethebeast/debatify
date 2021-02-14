@@ -258,3 +258,9 @@ class RecentChatComments(models.Model):
     DATE = models.DateTimeField(auto_now_add=True)
     TEXT = models.CharField(max_length=600, blank=True, null=True)
     DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
+
+class Picture(models.Model):
+    ID = models.AutoField(primary_key=True)
+    PATH = models.CharField(max_length=600, blank=True, null=True)
+    APPROVED = models.IntegerField(default=1, null=False)
+    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)

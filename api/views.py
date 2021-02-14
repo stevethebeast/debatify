@@ -16,9 +16,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer,\
-UserSerializer, ChatCommentSerializer, RecentChatCommentsSerializer
+UserSerializer, ChatCommentSerializer, RecentChatCommentsSerializer, PictureSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, User, ChatComment, RecentChatComments
+Counter_argument_vote, User, ChatComment, RecentChatComments, Picture
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -270,6 +270,36 @@ class RecentChatCommentsViewSet(viewsets.ModelViewSet):
             return Response(serializer.data,status=201)
         else:
             return Response(serializer.errors, status=400)
+
+class PictureViewSet(viewsets.ModelViewSet):
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
+    queryset = Picture.objects.all().order_by('ID')
+    serializer_class = PictureSerializer
+
+    def create(self, request):
+        data = JSONParser().parse(request)
+        serializer = PictureSerializer(data=data)
+        if serializer.is_valid():
+            req = requests.post("https://api.deepai.org/api/nsfw-detector", data={'image': serializer.validated_data['PATH']}, headers={'api-key': 'adfac0aa-8267-4206-be9a-2812c18a9951'})
+            if req.status_code != 200:
+                return Response(req.text, status=req.status_code)
+            nsfwresponse = json.loads(req.text)
+            for detection in nsfwresponse['output']['detections']:
+                if detection['name'] == 'Female Breast - Exposed' or detection['name'] == 'Male Genitalia - Exposed' or detection['name'] == 'Female Genitalia - Exposed':
+                    serializer.validated_data['APPROVED'] = 0
+                    break
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors,status=400)
+
+    def update(self, request, pk=None):
+        response = {'message': 'Update function is not offered in this path.'}
+        return Response(response, status=status.HTTP_403_FORBIDDEN)
+
+    def partial_update(self, request, pk=None):
+        response = {'message': 'Update function is not offered in this path.'}
+        return Response(response, status=status.HTTP_403_FORBIDDEN)
 
 class SearchDebatesAPIView(generics.ListCreateAPIView):
     permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]

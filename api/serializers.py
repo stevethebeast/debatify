@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, User, ChatComment, RecentChatComments
+Counter_argument_vote, User, ChatComment, RecentChatComments, Picture
 
 class DebateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,3 +61,9 @@ class RecentChatCommentsSerializer(serializers.ModelSerializer):
         model = RecentChatComments
         fields = '__all__'
         list_serializer_class = RecentChatCommentsListSerializer
+
+class PictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Picture
+        fields = '__all__'
+        #read_only_fields = ['APPROVED']
