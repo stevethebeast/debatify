@@ -2,6 +2,7 @@ from django.urls import include, path
 from django.conf.urls import url
 from rest_framework import routers
 from . import views, tokens
+from .social_auth import views as SocialViews
 
 router = routers.DefaultRouter()
 router.register(r'Arguments', views.ArgumentViewSet)
@@ -33,4 +34,7 @@ urlpatterns = [
     path('logincpt/', views.logincpt),
     path('emailpasswordreset/', views.email_password_reset),
     path('change_password/', views.change_password),
+    #path('google/', SocialViews.GoogleSocialAuthView.as_view()),
+    #path('facebook/', SocialViews.FacebookSocialAuthView.as_view()),
+    #path('twitter/', SocialViews.TwitterSocialAuthView.as_view()),
 ]

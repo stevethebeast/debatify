@@ -6,6 +6,14 @@ SECRET_KEY = '8p=sgre$q3%9fc7dw#e2k0$xtrfyx=@4a(1yhd!rbdkun91nq^'
 
 GOOGLE_RECAPTCHA_SECRET_KEY = "6LfGCBcaAAAAAGZV486tW3qq4tGNehToaRC6WogO"
 
+GOOGLE_CLIENT_ID = "bullshit"
+
+SOCIAL_SECRET = "bullshit"
+
+GOOGLE_CLIENT_ID = "113866266739-dn4p2hggm08em4cbc4guia3veu5edaof.apps.googleusercontent.com"
+
+GOOGLE_CLIENT_SECRET = "2CmcKgWaHs0mZe_QeCs9n1ad"
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

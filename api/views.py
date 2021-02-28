@@ -35,6 +35,7 @@ from django.template import loader
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from datetime import datetime
+from .social_auth.serializers import FacebookSocialAuthSerializer, GoogleSocialAuthSerializer, TwitterAuthSerializer
 
 class DebateViewSet(viewsets.ModelViewSet):
     permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
@@ -473,15 +474,41 @@ def UserHistory(request):
 def logincpt(request):
     permission_classes = [SafelistPermission]
     data = request.data
-    user = authenticate(email=data["email"], password=data["password"])
-    if user is not None and user.mail_confirmed is True:
-        sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'auth_token': token.key})
-    elif user is not None and user.mail_confirmed is False:
-        return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)
+    if data['provider'] is not None and data['auth_token'] is not None:
+        if data['provider'] == 'facebook':
+            serializer = FacebookSocialAuthSerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.validated_data)
+            else:
+                return Response(serializer.errors,status=400)
+        elif data['provider'] == 'twitter':
+            serializer = TwitterAuthSerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.validated_data)
+            else:
+                return Response(serializer.errors,status=400)
+        elif data['provider'] == 'google':
+            serializer = GoogleSocialAuthSerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.validated_data)
+            else:
+                return Response(serializer.errors,status=400)
+        elif data['provider'] == 'internal':
+            if data['password'] is None:
+                return Response("No password",status=400)
+            user = authenticate(email=data["email"], password=data["password"])
+            if user is not None and user.mail_confirmed is True:
+                sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'auth_token': token.key})
+            elif user is not None and user.mail_confirmed is False:
+                return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)
+            else:
+                return Response({"Error":"Invalid credentials"}, status=400)
+        else:
+            return Response("Provider does not exist",status=400)
     else:
-        return Response({"Error":"Invalid credentials"}, status=400)
+        return Response("Please name a provider and/or auth_token", status=400)
 
 @api_view(('POST',))
 def email_password_reset(request):
