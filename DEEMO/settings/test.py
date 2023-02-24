@@ -33,6 +33,10 @@ CORS_ALLOWED_ORIGINS = []
 
 DOMAIN = "http://127.0.0.1:8000"
 
+REST_SAFE_LIST_IPS = ['ALLOW_ALL']
+
+LOGIN_PROVIDED = True
+
 import dj_database_url
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)

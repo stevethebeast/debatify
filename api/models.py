@@ -36,6 +36,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None
     email = models.EmailField('email address', unique=True)
+    provider = models.CharField(max_length=10, unique=False, null=False, default="Internal")
     mail_confirmed = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -257,4 +258,10 @@ class RecentChatComments(models.Model):
     CONTACT_NAME = models.CharField(max_length=50, blank=True, null=True)
     DATE = models.DateTimeField(auto_now_add=True)
     TEXT = models.CharField(max_length=600, blank=True, null=True)
+    DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)
+
+class Picture(models.Model):
+    ID = models.AutoField(primary_key=True)
+    PATH = models.CharField(max_length=600, blank=True, null=True)
+    APPROVED = models.IntegerField(default=1, null=False)
     DEBATE_ID = models.ForeignKey(Debate, on_delete=models.CASCADE, blank=True, null=False)

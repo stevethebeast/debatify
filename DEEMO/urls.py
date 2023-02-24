@@ -14,17 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf.urls import url
 from django.conf import settings
+from djoser import views
+from djoser.urls import authtoken
 
 urlpatterns = []
 
 if settings.ADMIN_ENABLED is True:
     urlpatterns += [path('admin/', admin.site.urls),]
 
+if settings.LOGIN_PROVIDED is True:
+    urlpatterns += [re_path(r'^api/auth/token/login/?$', views.TokenCreateView.as_view(), name="login"),]
+
 urlpatterns += [
     path('', include('api.urls')),
-    url(r'^api/auth/', include('djoser.urls.authtoken')),
-    url(r'^api/auth/', include('djoser.urls')),
+    re_path(r'^api/auth/token/logout/?$', views.TokenDestroyView.as_view(), name="logout"),
+    #url(r'^api/auth/', include('djoser.urls')),
 ]

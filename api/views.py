@@ -5,7 +5,7 @@ import sys, requests, json, urllib.request, time, random, string
 from rest_framework import viewsets, views, status, filters, generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly 
 from django.shortcuts import render
 from django.db.models import F, Count
 from django.db.models.functions import Cast
@@ -16,9 +16,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from .serializers import DebateSerializer, ArgumentSerializer,\
 CounterArgumentSerializer, DebateVoteSerializer, ArgumentVoteSerializer, CounterArgumentVoteSerializer,\
-UserSerializer, ChatCommentSerializer, RecentChatCommentsSerializer
+UserSerializer, ChatCommentSerializer, RecentChatCommentsSerializer, PictureSerializer
 from .models import Debate, Argument, Counter_argument, Debate_vote, Argument_vote,\
-Counter_argument_vote, User, ChatComment, RecentChatComments
+Counter_argument_vote, User, ChatComment, RecentChatComments, Picture
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -28,16 +28,17 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from .tokens import account_activation_token
+from .tokens import account_activation_token, SafelistPermission
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template import loader
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from datetime import datetime
+from .social_auth.serializers import FacebookSocialAuthSerializer, GoogleSocialAuthSerializer, TwitterAuthSerializer
 
 class DebateViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Debate.objects.all().order_by('ID')
     serializer_class = DebateSerializer
 
@@ -54,12 +55,14 @@ class DebateViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class DebateTop20ActivityViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Debate.objects.all().order_by('-ACTIVITY_SCORE')[:20]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     serializer_class = DebateSerializer
+    def list(self, request):
+        query = Debate.objects.annotate(CREATOR_NAME=F('CREATOR_ID__first_name')).values('ID','NAME','YES_TITLE','NO_TITLE','CONTEXT','PHOTO_PATH','IS_PUBLIC','CREATOR_ID','CREATED_AT','ACTIVITY_SCORE','LATITUDE','LONGITUDE','CATEGORY_ID','CREATOR_NAME').order_by('-ACTIVITY_SCORE')[:20]
+        return Response(list(query))
 
 class ArgumentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Argument.objects.all().order_by('ID')
     serializer_class = ArgumentSerializer
 
@@ -77,7 +80,7 @@ class ArgumentViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class CounterArgumentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Counter_argument.objects.all().order_by('ID')
     serializer_class = CounterArgumentSerializer
 
@@ -96,7 +99,7 @@ class CounterArgumentViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class DebateVoteViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Debate_vote.objects.all().order_by('ID')
     serializer_class = DebateVoteSerializer
 
@@ -132,7 +135,7 @@ class DebateVoteViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class ArgumentVoteViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Argument_vote.objects.all().order_by('ID')
     serializer_class = ArgumentVoteSerializer
 
@@ -183,7 +186,7 @@ class ArgumentVoteViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     queryset = Counter_argument_vote.objects.all().order_by('ID')
     serializer_class = CounterArgumentVoteSerializer
 
@@ -234,7 +237,7 @@ class CounterArgumentVoteViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=400)
 
 class ChatCommentViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     serializer_class = RecentChatCommentsSerializer
     def list(self, request):
         debateid = request.query_params.get('id', None)
@@ -246,7 +249,7 @@ class ChatCommentViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(serializer.data)
 
 class RecentChatCommentsViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     serializer_class = RecentChatCommentsSerializer
     def list(self, request):
         debateid = request.query_params.get('id', None)
@@ -269,47 +272,45 @@ class RecentChatCommentsViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=400)
 
+class PictureViewSet(viewsets.ModelViewSet):
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
+    queryset = Picture.objects.all().order_by('ID')
+    serializer_class = PictureSerializer
+
+    def create(self, request):
+        data = JSONParser().parse(request)
+        serializer = PictureSerializer(data=data)
+        if serializer.is_valid():
+            req = requests.post("https://api.deepai.org/api/nsfw-detector", data={'image': serializer.validated_data['PATH']}, headers={'api-key': 'adfac0aa-8267-4206-be9a-2812c18a9951'})
+            if req.status_code != 200:
+                return Response(req.text, status=req.status_code)
+            nsfwresponse = json.loads(req.text)
+            for detection in nsfwresponse['output']['detections']:
+                if detection['name'] == 'Female Breast - Exposed' or detection['name'] == 'Male Genitalia - Exposed' or detection['name'] == 'Female Genitalia - Exposed':
+                    serializer.validated_data['APPROVED'] = 0
+                    break
+            serializer.save()
+            return Response(serializer.data,status=201)
+        else:
+            return Response(serializer.errors,status=400)
+
+    def update(self, request, pk=None):
+        response = {'message': 'Update function is not offered in this path.'}
+        return Response(response, status=status.HTTP_403_FORBIDDEN)
+
+    def partial_update(self, request, pk=None):
+        response = {'message': 'Update function is not offered in this path.'}
+        return Response(response, status=status.HTTP_403_FORBIDDEN)
+
 class SearchDebatesAPIView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [SafelistPermission&IsAuthenticatedOrReadOnly]
     search_fields = ['NAME', 'YES_TITLE', 'NO_TITLE']
     filter_backends = (filters.SearchFilter,)
     queryset = Debate.objects.filter(IS_PUBLIC=1).all()
     serializer_class = DebateSerializer
 
-@api_view(['GET','POST'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def GetOrCreateDebateVote(request):
-    key=request.auth
-    user = None
-    debatevote = None
-    if key is not None:
-        user = Token.objects.get(key=key).user_id
-    #sys.stderr.write("yolo " +str(user))
-    if request.method == 'GET':
-        debateid = request.query_params.get('id', None)
-        if debateid is None:
-            content = {"Bad request": "Please put an id as argument"}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-        if user is not None:
-            debatevote = Debate_vote.objects.filter(DEBATE_ID=debateid, CONTACT_ID=user).all()
-        else:
-            debatevote = Debate_vote.objects.all().order_by('DEBATE_ID')
-        if debatevote is not None:
-            serializer = DebateVoteSerializer(debatevote, many=True)
-            return Response(serializer.data)
-        else:
-            return Response({"Response":"Nothing to see here"})
-    else:
-        data = JSONParser().parse(request)
-        serializer = DebateVoteSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=201)
-        else:
-            return Response(serializer.errors, status=400)
-
 @api_view(['GET'])
-#@permission_classes([IsAuthenticatedOrReadOnly])
+@permission_classes([SafelistPermission])
 def ListDebatesWithUserChoices(request):
     key=request.auth
     user = None
@@ -321,7 +322,7 @@ def ListDebatesWithUserChoices(request):
         return Response(content)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([SafelistPermission])
 def ListCounterArgumentsWithUserChoices(request):
     key=request.auth
     user = None
@@ -337,7 +338,7 @@ def ListCounterArgumentsWithUserChoices(request):
         return Response(content)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([SafelistPermission])
 def ListArgumentsWithUserChoices(request):
     key=request.auth
     user = None
@@ -353,24 +354,7 @@ def ListArgumentsWithUserChoices(request):
         return Response(content)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
-def GetAllCounterArgumentsWithLikesByArgumentID(request):
-    key=request.auth
-    user = None
-    counterargumentid = request.query_params.get('id', None)
-    if counterargumentid is None:
-        content = {"Bad request": "Please put an id as argument"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-    if key is not None:
-        user = Token.objects.get(key=key).user_id
-        return Response(Counter_argument.objects.with_counterargumentlikes(counterargumentid, user))
-    else:
-        content = Counter_argument.objects.all().order_by('ID')
-        serializer = CounterArgumentSerializer(content, many=True)
-        return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([SafelistPermission&IsAuthenticated])
 def GetTokenUsername(request):
     key = request.auth
     if key is not None:
@@ -471,7 +455,7 @@ def recaptcha_valid(request):
 
 @api_view(('GET',))
 def UserHistory(request):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SafelistPermission]
     key = request.auth
     user = Token.objects.get(key=key).user_id
     #Argument_vote.objects.filter(CONTACT_ID=user).annotate(ARGUMENT_VOTE_ID="ID", ARGUMENT_VOTE_LIKE="LIKE", ARGUMENT_VOTE_ARGUMENTID="ARGUMENT_ID", ARGUMENTVOTECREATE="CREATED_AT").values("ID", "LIKE", "ARGUMENT_ID", "CREATED_AT").order_by('-CREATED_AT')
@@ -488,16 +472,43 @@ def UserHistory(request):
 
 @api_view(('POST',))
 def logincpt(request):
+    permission_classes = [SafelistPermission]
     data = request.data
-    user = authenticate(email=data["email"], password=data["password"])
-    if user is not None and user.mail_confirmed is True:
-        sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'auth_token': token.key})
-    elif user is not None and user.mail_confirmed is False:
-        return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)
+    if data['provider'] is not None and data['auth_token'] is not None:
+        if data['provider'] == 'facebook':
+            serializer = FacebookSocialAuthSerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.validated_data)
+            else:
+                return Response(serializer.errors,status=400)
+        elif data['provider'] == 'twitter':
+            serializer = TwitterAuthSerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.validated_data)
+            else:
+                return Response(serializer.errors,status=400)
+        elif data['provider'] == 'google':
+            serializer = GoogleSocialAuthSerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.validated_data)
+            else:
+                return Response(serializer.errors,status=400)
+        elif data['provider'] == 'internal':
+            if data['password'] is None:
+                return Response("No password",status=400)
+            user = authenticate(email=data["email"], password=data["password"])
+            if user is not None and user.mail_confirmed is True:
+                sys.stderr.write("EMAIL HOST USER " + settings.EMAIL_HOST_USER)
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'auth_token': token.key})
+            elif user is not None and user.mail_confirmed is False:
+                return Response({"Error":"User not yet confirmed"}, status=status.HTTP_423_LOCKED)
+            else:
+                return Response({"Error":"Invalid credentials"}, status=400)
+        else:
+            return Response("Provider does not exist",status=400)
     else:
-        return Response({"Error":"Invalid credentials"}, status=400)
+        return Response("Please name a provider and/or auth_token", status=400)
 
 @api_view(('POST',))
 def email_password_reset(request):
@@ -523,7 +534,7 @@ def email_password_reset(request):
 
 @api_view(('POST',))
 def change_password(request):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SafelistPermission&IsAuthenticated]
     data = request.data
     user = Token.objects.get(key=request.auth).user_id
     if user is not None:
